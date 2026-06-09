@@ -1,1 +1,0 @@
-supervised learning is used when labels are given for input and output and unsupervised learning. we don't have labels.

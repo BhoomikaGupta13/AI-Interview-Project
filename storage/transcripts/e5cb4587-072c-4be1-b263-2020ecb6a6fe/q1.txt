@@ -1,1 +1,0 @@
-explain explain the concept of tfidf and its application in natural language processing. so tfidf is a type of vectorization which is used to find the the words words the context words words in a document mostly used in nlp.
