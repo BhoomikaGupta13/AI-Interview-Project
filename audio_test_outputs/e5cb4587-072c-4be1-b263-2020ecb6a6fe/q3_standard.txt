@@ -1,0 +1,1 @@
+Supervised learning is used when labels are given for input and output and unsupervised learning. tab labels.

@@ -1,0 +1,113 @@
+{
+    "session_id": "e27ecc73-89c5-44a0-9d0e-2573b9d88df3",
+    "created_at": "2026-05-25T16:08:51.869517",
+    "expires_at": "2026-05-27T16:08:51.869517",
+    "status": "TERMINATED",
+    "attempt_used": true,
+    "questions": [
+        "Can you explain the concept of TF-IDF and its application in Natural Language Processing?",
+        "How does the NumPy library in Python optimize numerical computations, and what are some of its key features?",
+        "What is the difference between supervised and unsupervised learning in Machine Learning, and how do you decide which approach to use?",
+        "How does the OpenCV library facilitate image and video processing, and what are some of its key applications?",
+        "Can you describe the architecture of your Movie Recommender System project, including the tech stack and any challenges you faced?",
+        "How did you design the Face Recognition System project, and what were some of the key considerations for ensuring accurate recognition?",
+        "What was the tech stack used in your Deepfake Detection System project, and how did you handle any challenges that arose during development?",
+        "Can you walk us through your approach to web scraping in your projects, including any tools or techniques you used?",
+        "As an AI-ML Intern at Data Ingenious Global Ltd., Jaipur, can you describe a typical project you worked on and your role in it?",
+        "How did your experience at Data Ingenious Global Ltd., Jaipur, help you develop your skills in Machine Learning and related technologies?",
+        "Can you summarize the main contributions and findings of your research publication 'Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization'?",
+        "What was the most significant achievement you felt you accomplished as a Dean's List Holder for academic excellence, and how did it impact your academic and professional goals?"
+    ],
+    "candidate": {
+        "skills": [
+            "C",
+            "C++",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "NumPy",
+            "Pandas",
+            "Matplotlib",
+            "OpenCV",
+            "FastAPI",
+            "DSA",
+            "Design and Analysis of Algorithms (DAA)",
+            "Object-Oriented Programming (OOP)",
+            "Machine Learning",
+            "Natural Language Processing",
+            "TF-IDF",
+            "Cosine Similarity",
+            "Web Scraping",
+            "Data Preprocessing"
+        ],
+        "projects": [
+            "Movie Recommender System",
+            "Face Recognition System",
+            "Deepfake Detection System"
+        ],
+        "experience": [
+            "AI-ML Intern at Data Ingenious Global Ltd., Jaipur"
+        ],
+        "education": [
+            "B.Tech in Computer Science (AI-ML) at Manipal University Jaipur",
+            "Senior Secondary (Class XII) at Jayshree Periwal High School",
+            "Secondary (Class X) at India International School"
+        ],
+        "certifications": [
+            "Design and Analysis of Algorithms",
+            "Introduction to Machine Learning"
+        ],
+        "achievements": [
+            "Dean\u2019s List Holder for academic excellence",
+            "Secured Top 15 out of 500+ teams at HackSky'25"
+        ],
+        "research_publications": [
+            "Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization \u2014 Scientific Reports (Nature)"
+        ],
+        "patents": [],
+        "co_curricular": []
+    },
+    "started_at": "2026-05-25T16:08:54.757194",
+    "terminated_at": "2026-05-25T16:09:17.084822",
+    "termination_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "proctoring": {
+        "session_id": "e27ecc73-89c5-44a0-9d0e-2573b9d88df3",
+        "locked": true,
+        "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+        "fullscreen_warnings": 2,
+        "tab_warnings": 1,
+        "face_warnings": 0,
+        "pose_warnings": 0,
+        "face_detection_available": null,
+        "flags": [],
+        "events": [
+            {
+                "timestamp": "2026-05-25T16:08:59.453186",
+                "question": "1",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            },
+            {
+                "timestamp": "2026-05-25T16:09:00.882481",
+                "question": "1",
+                "event_type": "tab_switch",
+                "details": {
+                    "message": "Candidate switched tab, minimized window, or changed app focus",
+                    "reason": "document_hidden"
+                }
+            },
+            {
+                "timestamp": "2026-05-25T16:09:16.896473",
+                "question": "1",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            }
+        ]
+    }
+}

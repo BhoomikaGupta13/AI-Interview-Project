@@ -1,0 +1,1 @@
+MBI is a Python IDE that is used to handle multiple convention arrays using nv.addy because many of the functions in the library which can handle the complete matrices and arrays very efficiently the first normal python handles the list only but allows to handle that is an efficient model.

@@ -1,0 +1,1 @@
+This research paper I trained each different models in Logan Desnit, Random Forest, Exibust, and Renewal for testing which model performance on the Arabian criterias.

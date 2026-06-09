@@ -1,0 +1,142 @@
+{
+    "session_id": "702c317f-4ff2-45e9-acde-d5d84199ba35",
+    "created_at": "2026-05-25T16:00:26.461904",
+    "expires_at": "2026-05-27T16:00:26.461904",
+    "status": "TERMINATED",
+    "attempt_used": true,
+    "questions": [
+        "Can you explain the concept of TF-IDF and its application in Natural Language Processing?",
+        "How does the NumPy library in Python optimize numerical computations, and what are some of its key features?",
+        "What is the difference between supervised and unsupervised learning in Machine Learning, and how do you decide which approach to use?",
+        "Can you describe the architecture of a Face Recognition System, including the tech stack and challenges you faced while building it?",
+        "How does the Movie Recommender System you built handle cold start problems, and what algorithms did you use to generate recommendations?",
+        "What was the tech stack used in the Deepfake Detection System, and what were some of the challenges you encountered during its development?",
+        "Can you walk me through the architecture of the Face Recognition System, including any preprocessing steps and the models used?",
+        "How did you handle data preprocessing in the Movie Recommender System, and what techniques did you use to improve the accuracy of the recommendations?",
+        "During your internship at Data Ingenious Global Ltd., can you describe a specific project you worked on and your role in it?",
+        "Can you elaborate on your experience with building a content-based movie recommendation system, including any challenges you faced and how you overcame them?",
+        "Can you explain the concept of cosine similarity and its application in information retrieval, particularly in the context of your research publication 'Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization'?",
+        "What motivated you to participate in HackSky'25, and can you describe your experience and the skills you applied during the competition?"
+    ],
+    "candidate": {
+        "skills": [
+            "C",
+            "C++",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "NumPy",
+            "Pandas",
+            "Matplotlib",
+            "OpenCV",
+            "FastAPI",
+            "DSA",
+            "Machine Learning",
+            "Natural Language Processing",
+            "TF-IDF",
+            "Cosine Similarity",
+            "Web Scraping",
+            "Data Preprocessing",
+            "VS Code",
+            "Replit"
+        ],
+        "projects": [
+            "Movie Recommender System",
+            "Face Recognition System",
+            "Deepfake Detection System"
+        ],
+        "experience": [
+            {
+                "company": "Data Ingenious Global Ltd.",
+                "position": "AI-ML Intern",
+                "duration": "May 2025 - July 2025",
+                "achievements": [
+                    "Built a content-based movie recommendation system",
+                    "Developed a real-time face recognition pipeline"
+                ]
+            }
+        ],
+        "education": [
+            {
+                "institution": "Manipal University Jaipur",
+                "degree": "B.Tech in Computer Science (AI-ML)",
+                "cgpa": "9.91/10",
+                "duration": "Aug 2023 - Present"
+            },
+            {
+                "institution": "Jayshree Periwal High School",
+                "degree": "Senior Secondary (Class XII)",
+                "percentage": "90.8%",
+                "duration": "2020-2022"
+            },
+            {
+                "institution": "India International School",
+                "degree": "Secondary (Class X)",
+                "percentage": "95.6%",
+                "duration": "2019-2020"
+            }
+        ],
+        "certifications": [
+            "Design and Analysis of Algorithms",
+            "Introduction to Machine Learning"
+        ],
+        "achievements": [
+            "Dean\u2019s List Holder for academic excellence",
+            "Secured Top 15 out of 500+ teams at HackSky'25"
+        ],
+        "research_publications": [
+            {
+                "title": "Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization",
+                "publication": "Scientific Reports (Nature)",
+                "doi": "DOI"
+            }
+        ],
+        "patents": [],
+        "co_curricular": []
+    },
+    "started_at": "2026-05-25T16:00:29.317293",
+    "terminated_at": "2026-05-25T16:00:48.903275",
+    "termination_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "proctoring": {
+        "session_id": "702c317f-4ff2-45e9-acde-d5d84199ba35",
+        "locked": true,
+        "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+        "fullscreen_warnings": 2,
+        "tab_warnings": 0,
+        "face_warnings": 0,
+        "pose_warnings": 0,
+        "face_detection_available": null,
+        "flags": [],
+        "events": [
+            {
+                "timestamp": "2026-05-25T16:00:34.908941",
+                "question": "1",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            },
+            {
+                "timestamp": "2026-05-25T16:00:36.238581",
+                "question": "1",
+                "event_type": "tab_switch",
+                "details": {
+                    "message": "Candidate switched tab, minimized window, or changed app focus",
+                    "reason": "window_blur"
+                },
+                "ignored": true,
+                "ignore_reason": "Suppressed blur/visibility event caused by fullscreen exit."
+            },
+            {
+                "timestamp": "2026-05-25T16:00:48.386635",
+                "question": "1",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            }
+        ]
+    }
+}

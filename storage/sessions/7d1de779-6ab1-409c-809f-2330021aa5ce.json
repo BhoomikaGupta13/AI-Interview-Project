@@ -1,0 +1,73 @@
+{
+    "session_id": "7d1de779-6ab1-409c-809f-2330021aa5ce",
+    "created_at": "2026-05-29T12:14:54.977396",
+    "expires_at": "2026-05-31T12:14:54.977396",
+    "status": "NOT_STARTED",
+    "attempt_used": false,
+    "questions": [
+        "Can you explain the architecture of your 'Movie Recommender System' project and how you implemented it?",
+        "What was the tech stack used in your 'Face Recognition System' project and how did you choose it?",
+        "What were some of the challenges you faced while working on the 'Deepfake Detection System' project and how did you overcome them?",
+        "How did you design the architecture of your 'HackSky'25' project and what were some of the key considerations?",
+        "Can you explain the concept of Object-Oriented Programming (OOP) and provide an example of how it is used in real-world applications?",
+        "How does the TF-IDF algorithm work and what are some of its applications in Natural Language Processing?",
+        "What is the difference between NumPy and Pandas, and when would you use each in a data analysis project?",
+        "Can you describe the concept of Cosine Similarity and how it is used in machine learning models?",
+        "Can you walk me through your experience as an AI-ML Intern at Data Ingenious Global Ltd., Jaipur, and what were some of your key responsibilities?",
+        "How did you contribute to the team during your internship and what did you learn from the experience?",
+        "Can you tell me about your research publication 'Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization' and what was the main contribution of the paper?",
+        "Can you explain how your achievement of being a 'Dean's List Holder for academic excellence' has helped you in your career so far?"
+    ],
+    "candidate": {
+        "skills": [
+            "C",
+            "C++",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "NumPy",
+            "Pandas",
+            "Matplotlib",
+            "OpenCV",
+            "FastAPI",
+            "DSA",
+            "Design and Analysis of Algorithms (DAA)",
+            "Object-Oriented Programming (OOP)",
+            "Machine Learning",
+            "Natural Language Processing",
+            "TF-IDF",
+            "Cosine Similarity",
+            "Web Scraping",
+            "Data Preprocessing"
+        ],
+        "projects": [
+            "HackSky'25",
+            "Movie Recommender System",
+            "Face Recognition System",
+            "Deepfake Detection System"
+        ],
+        "experience": [
+            "AI-ML Intern at Data Ingenious Global Ltd., Jaipur"
+        ],
+        "education": [
+            "B.Tech in Computer Science (AI-ML) at Manipal University Jaipur",
+            "Senior Secondary (Class XII) at Jayshree Periwal High School",
+            "Secondary (Class X) at India International School"
+        ],
+        "certifications": [
+            "Design and Analysis of Algorithms",
+            "Introduction to Machine Learning"
+        ],
+        "achievements": [
+            "Dean's List Holder for academic excellence",
+            "Secured Top 15 out of 500+ teams at HackSky'25"
+        ],
+        "research_publications": [
+            "Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization"
+        ],
+        "patents": [],
+        "co_curricular": []
+    }
+}

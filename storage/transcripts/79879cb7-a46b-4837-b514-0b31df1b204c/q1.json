@@ -1,0 +1,38 @@
+{
+    "session_id": "79879cb7-a46b-4837-b514-0b31df1b204c",
+    "question": "q1",
+    "language": "en",
+    "full_text": "So the version is, you can explain the architecture of your mediaecom index system, your check and how do you implement it carefully. For a new video, I will share with you the knowledge with you in many things, because mine in real commemoration strength will change. So this test mine here shortly.",
+    "transcript": [
+        {
+            "start": 4.22,
+            "end": 10.36,
+            "text": "So the version is, you can explain the architecture of your mediaecom index system, your check"
+        },
+        {
+            "start": 10.36,
+            "end": 12.62,
+            "text": "and how do you implement it carefully."
+        },
+        {
+            "start": 13.44,
+            "end": 20.76,
+            "text": "For a new video, I will share with you the knowledge with you in many things, because"
+        },
+        {
+            "start": 20.76,
+            "end": 23.48,
+            "text": "mine in real commemoration strength will change."
+        },
+        {
+            "start": 32.28,
+            "end": 34.08,
+            "text": "So this test mine here shortly."
+        }
+    ],
+    "question_no": 1,
+    "video_path": "storage\\recordings\\79879cb7-a46b-4837-b514-0b31df1b204c\\q1.webm",
+    "audio_path": "storage\\audio\\79879cb7-a46b-4837-b514-0b31df1b204c\\q1.wav",
+    "transcription_audio_path": "storage\\audio\\79879cb7-a46b-4837-b514-0b31df1b204c\\q1_enhanced.wav",
+    "proctor_flags": []
+}

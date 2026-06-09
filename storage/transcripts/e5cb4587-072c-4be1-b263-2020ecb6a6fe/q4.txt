@@ -1,0 +1,1 @@
+with opencv, our video can be divided into multiple frames. thank you very much. for your time, and i'll see you in the next video.

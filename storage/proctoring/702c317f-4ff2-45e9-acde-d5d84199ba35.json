@@ -1,0 +1,49 @@
+{
+    "session_id": "702c317f-4ff2-45e9-acde-d5d84199ba35",
+    "locked": true,
+    "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "fullscreen_warnings": 2,
+    "tab_warnings": 1,
+    "face_warnings": 0,
+    "pose_warnings": 0,
+    "face_detection_available": null,
+    "flags": [],
+    "events": [
+        {
+            "timestamp": "2026-05-25T16:00:34.908941",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T16:00:36.238581",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "window_blur"
+            },
+            "ignored": true,
+            "ignore_reason": "Suppressed blur/visibility event caused by fullscreen exit."
+        },
+        {
+            "timestamp": "2026-05-25T16:00:48.386635",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T16:00:49.049295",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "pagehide"
+            }
+        }
+    ]
+}

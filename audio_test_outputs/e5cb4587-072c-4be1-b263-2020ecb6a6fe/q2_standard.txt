@@ -1,0 +1,1 @@
+So, how does a NumPy library in Python optimise numerical computations and what are some of its key features? So, NumPy is a library in Python that is used for array operations such as np.array so so we can perform operations on array.

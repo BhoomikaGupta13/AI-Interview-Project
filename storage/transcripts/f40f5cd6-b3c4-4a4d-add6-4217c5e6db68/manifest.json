@@ -1,0 +1,152 @@
+{
+    "session_id": "f40f5cd6-b3c4-4a4d-add6-4217c5e6db68",
+    "recording_dir": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68",
+    "audio_dir": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68",
+    "transcript_dir": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68",
+    "summary_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\summary.txt",
+    "results": [
+        {
+            "question_no": 1,
+            "status": "success",
+            "full_text": "Yep, I did have to show her this application in any way, now it's turned on which was essentially you're still trying to get there, and you're struggling to find a solution. Yeah.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q1.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q1.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q1.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q1.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q1.json"
+        },
+        {
+            "question_no": 2,
+            "status": "success",
+            "full_text": "So, I would like to share with you some of the things that I have been doing in my life. So, I would like to share with you some of the things that I have been doing in my life.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q2.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q2.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q2.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q2.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q2.json"
+        },
+        {
+            "question_no": 3,
+            "status": "success",
+            "full_text": "We are watching to the page. We are going to turn this thing off. So the right span and to the left span.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q3.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q3.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q3.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q3.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q3.json"
+        },
+        {
+            "question_no": 4,
+            "status": "success",
+            "full_text": "Okay. Okay. Okay. Okay. Okay. Okay.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q4.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q4.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q4.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q4.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q4.json"
+        },
+        {
+            "question_no": 5,
+            "status": "success",
+            "full_text": "Thank you.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q5.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q5.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q5.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q5.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q5.json"
+        },
+        {
+            "question_no": 6,
+            "status": "success",
+            "full_text": "",
+            "language": "nn",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q6.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q6.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q6.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q6.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q6.json"
+        },
+        {
+            "question_no": 7,
+            "status": "success",
+            "full_text": "I don't know if it's in the other movie next to it, so you give us a, like, a one-shot of me, if I'm not mistaken. I'm going to let you guys do this.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q7.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q7.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q7.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q7.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q7.json"
+        },
+        {
+            "question_no": 8,
+            "status": "success",
+            "full_text": "\u0648\u0642\u062f \u0627\u0645\u0627\u0646\u0634 \u0627\u0644\u0633\u0627\u0641 \u0645\u0646 \u0627\u0644\u0639\u0628\u0627\u0631\u0629 \u0627\u0644\u0643\u0648\u0643\u0628 \u0627\u0644\u0631\u0626\u064a\u0633\u0629 \u0628\u0627\u0644\u0646\u0633\u0628\u0629 \u0644\u0644\u0646\u0633\u0628\u0629",
+            "language": "ar",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q8.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q8.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q8.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q8.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q8.json"
+        },
+        {
+            "question_no": 9,
+            "status": "success",
+            "full_text": "",
+            "language": "hi",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q9.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q9.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q9.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q9.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q9.json"
+        },
+        {
+            "question_no": 10,
+            "status": "success",
+            "full_text": "",
+            "language": "nn",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q10.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q10.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q10.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q10.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q10.json"
+        },
+        {
+            "question_no": 11,
+            "status": "success",
+            "full_text": "So, I now strongly remain this project, which has a new kind of system and a base urbanization system in the theme of three people.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q11.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q11.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q11.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q11.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q11.json"
+        },
+        {
+            "question_no": 12,
+            "status": "success",
+            "full_text": "This was my first time to learn how to do this. Thanks for watching, and I'll see you in the next video.",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q12.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q12.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q12.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q12.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q12.json"
+        },
+        {
+            "question_no": 13,
+            "status": "success",
+            "full_text": "Thank you. You You You You You",
+            "language": "en",
+            "video_path": "storage\\recordings\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q13.webm",
+            "audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q13.wav",
+            "clean_audio_path": "storage\\audio\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q13.wav",
+            "txt_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q13.txt",
+            "json_path": "storage\\transcripts\\f40f5cd6-b3c4-4a4d-add6-4217c5e6db68\\q13.json"
+        }
+    ]
+}

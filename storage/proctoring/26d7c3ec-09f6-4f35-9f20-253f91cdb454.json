@@ -1,0 +1,77 @@
+{
+    "session_id": "26d7c3ec-09f6-4f35-9f20-253f91cdb454",
+    "locked": true,
+    "lock_reason": "Interview locked after 3 tab switching warnings.",
+    "fullscreen_warnings": 1,
+    "tab_warnings": 5,
+    "face_warnings": 0,
+    "pose_warnings": 0,
+    "face_detection_available": null,
+    "flags": [],
+    "events": [
+        {
+            "timestamp": "2026-05-25T15:57:37.135649",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T15:57:38.153802",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "pagehide"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T15:57:39.111984",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "window_blur"
+            },
+            "ignored": true,
+            "ignore_reason": "Suppressed blur/visibility event caused by fullscreen exit."
+        },
+        {
+            "timestamp": "2026-05-25T15:58:00.409455",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "pagehide"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T15:58:52.172528",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "window_blur"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T15:59:01.911559",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "window_blur"
+            }
+        },
+        {
+            "timestamp": "2026-05-25T16:00:18.349135",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "pagehide"
+            }
+        }
+    ]
+}

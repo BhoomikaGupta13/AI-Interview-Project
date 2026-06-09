@@ -1,0 +1,143 @@
+{
+    "session_id": "9ffa52d1-6722-4a67-8ee8-5cbed6230285",
+    "locked": true,
+    "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "fullscreen_warnings": 2,
+    "tab_warnings": 1,
+    "face_warnings": 7,
+    "pose_warnings": 0,
+    "face_detection_available": true,
+    "flags": [
+        {
+            "timestamp": "2026-05-26T14:24:52.884250",
+            "question": "1",
+            "event_type": "no_face",
+            "details": {}
+        },
+        {
+            "timestamp": "2026-05-26T14:25:01.205658",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:20.988499",
+            "question": "1",
+            "event_type": "no_face",
+            "details": {}
+        },
+        {
+            "timestamp": "2026-05-26T14:25:28.505088",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:30.554897",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:31.451113",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:32.361878",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        }
+    ],
+    "events": [
+        {
+            "timestamp": "2026-05-26T14:24:52.884250",
+            "question": "1",
+            "event_type": "no_face",
+            "details": {}
+        },
+        {
+            "timestamp": "2026-05-26T14:25:01.205658",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:20.988499",
+            "question": "1",
+            "event_type": "no_face",
+            "details": {}
+        },
+        {
+            "timestamp": "2026-05-26T14:25:28.505088",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:30.554897",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:31.451113",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:32.361878",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:34.460193",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:38.214040",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-26T14:25:40.655224",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "document_hidden"
+            }
+        }
+    ]
+}

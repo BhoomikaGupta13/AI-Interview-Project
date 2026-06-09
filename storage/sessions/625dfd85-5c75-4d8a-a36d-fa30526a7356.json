@@ -1,0 +1,172 @@
+{
+    "session_id": "625dfd85-5c75-4d8a-a36d-fa30526a7356",
+    "created_at": "2026-05-26T12:39:53.732236",
+    "expires_at": "2026-05-28T12:39:53.732236",
+    "status": "TERMINATED",
+    "attempt_used": true,
+    "questions": [
+        "Can you explain the concept of TF-IDF and its application in Natural Language Processing?",
+        "How does the NumPy library in Python optimize numerical computations, and what are some of its key features?",
+        "What are the differences between supervised and unsupervised learning in Machine Learning, and how do you decide which approach to use?",
+        "How does the OpenCV library handle image processing, and what are some of its key functions?",
+        "Can you describe the architecture of your Movie Recommender System project, including the tech stack used and any challenges you faced?",
+        "How did you design the Face Recognition System project, and what were some of the key considerations for ensuring accurate recognition?",
+        "What was the tech stack used for the HackSky'25 project, and how did you handle any challenges that arose during development?",
+        "Can you walk us through the data preprocessing steps you took in the Deepfake Detection System project, and how you ensured data quality?",
+        "Can you describe your role and responsibilities as an AI-ML Intern at Data Ingenious Global Ltd., Jaipur, and what you learned from the experience?",
+        "How did you contribute to the team during your internship, and what were some of the key projects you worked on?",
+        "Can you explain the research methodology and key findings of your Intelligent Pavement Management research publication?",
+        "What were some of the key factors that contributed to your achievement of being a Dean's List Holder for academic excellence?"
+    ],
+    "candidate": {
+        "skills": [
+            "C",
+            "C++",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "NumPy",
+            "Pandas",
+            "Matplotlib",
+            "OpenCV",
+            "FastAPI",
+            "DSA",
+            "Machine Learning",
+            "Natural Language Processing",
+            "TF-IDF",
+            "Cosine Similarity",
+            "Web Scraping",
+            "Data Preprocessing"
+        ],
+        "projects": [
+            "HackSky'25",
+            "Movie Recommender System",
+            "Face Recognition System",
+            "Deepfake Detection System"
+        ],
+        "experience": [
+            "AI-ML Intern at Data Ingenious Global Ltd., Jaipur"
+        ],
+        "education": [
+            "B.Tech in Computer Science (AI-ML) at Manipal University Jaipur",
+            "Senior Secondary (Class XII) at Jayshree Periwal High School",
+            "Secondary (Class X) at India International School"
+        ],
+        "certifications": [
+            "Design and Analysis of Algorithms",
+            "Introduction to Machine Learning"
+        ],
+        "achievements": [
+            "Dean's List Holder for academic excellence",
+            "Secured Top 15 out of 500+ teams at HackSky'25"
+        ],
+        "research_publications": [
+            "Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization"
+        ],
+        "patents": [],
+        "co_curricular": []
+    },
+    "started_at": "2026-05-26T12:39:59.210747",
+    "terminated_at": "2026-05-26T12:40:56.192953",
+    "termination_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "proctoring": {
+        "session_id": "625dfd85-5c75-4d8a-a36d-fa30526a7356",
+        "locked": true,
+        "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+        "fullscreen_warnings": 2,
+        "tab_warnings": 0,
+        "face_warnings": 5,
+        "pose_warnings": 0,
+        "face_detection_available": true,
+        "flags": [
+            {
+                "timestamp": "2026-05-26T12:40:23.407866",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {}
+            },
+            {
+                "timestamp": "2026-05-26T12:40:26.144561",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {}
+            },
+            {
+                "timestamp": "2026-05-26T12:40:36.617043",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {}
+            },
+            {
+                "timestamp": "2026-05-26T12:40:46.800905",
+                "question": "1",
+                "event_type": "multiple_faces",
+                "details": {
+                    "count": 2
+                }
+            },
+            {
+                "timestamp": "2026-05-26T12:40:49.515397",
+                "question": "1",
+                "event_type": "multiple_faces",
+                "details": {
+                    "count": 2
+                }
+            }
+        ],
+        "events": [
+            {
+                "timestamp": "2026-05-26T12:40:23.407866",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {}
+            },
+            {
+                "timestamp": "2026-05-26T12:40:26.144561",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {}
+            },
+            {
+                "timestamp": "2026-05-26T12:40:36.617043",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {}
+            },
+            {
+                "timestamp": "2026-05-26T12:40:39.392806",
+                "question": "1",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            },
+            {
+                "timestamp": "2026-05-26T12:40:46.800905",
+                "question": "1",
+                "event_type": "multiple_faces",
+                "details": {
+                    "count": 2
+                }
+            },
+            {
+                "timestamp": "2026-05-26T12:40:49.515397",
+                "question": "1",
+                "event_type": "multiple_faces",
+                "details": {
+                    "count": 2
+                }
+            },
+            {
+                "timestamp": "2026-05-26T12:40:56.080112",
+                "question": "2",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            }
+        ]
+    }
+}

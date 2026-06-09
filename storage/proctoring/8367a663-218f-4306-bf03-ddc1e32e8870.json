@@ -1,0 +1,104 @@
+{
+    "session_id": "8367a663-218f-4306-bf03-ddc1e32e8870",
+    "locked": true,
+    "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "fullscreen_warnings": 2,
+    "tab_warnings": 1,
+    "face_warnings": 2,
+    "pose_warnings": 0,
+    "face_detection_available": true,
+    "face_state": "ok",
+    "flags": [
+        {
+            "timestamp": "2026-05-27T12:40:49.142960",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:41:15.575140",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        }
+    ],
+    "events": [
+        {
+            "timestamp": "2026-05-27T12:40:10.387128",
+            "question": "1",
+            "event_type": "face_ok",
+            "details": {
+                "count": 1
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:40:36.317776",
+            "question": "1",
+            "event_type": "face_ok",
+            "details": {
+                "count": 1
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:40:49.142960",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:40:52.760889",
+            "question": "1",
+            "event_type": "face_ok",
+            "details": {
+                "count": 1
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:41:15.575140",
+            "question": "1",
+            "event_type": "multiple_faces",
+            "details": {
+                "count": 2
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:41:16.913566",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:41:18.301708",
+            "question": "1",
+            "event_type": "face_ok",
+            "details": {
+                "count": 1
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:41:18.952865",
+            "question": "1",
+            "event_type": "fullscreen_exit",
+            "details": {
+                "message": "Candidate exited fullscreen"
+            }
+        },
+        {
+            "timestamp": "2026-05-27T12:41:20.870139",
+            "question": "1",
+            "event_type": "tab_switch",
+            "details": {
+                "message": "Candidate switched tab, minimized window, or changed app focus",
+                "reason": "document_hidden"
+            }
+        }
+    ]
+}

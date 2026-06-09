@@ -1,0 +1,201 @@
+{
+    "session_id": "e1b8bfd6-1ca3-4abb-91b3-44701f0c952f",
+    "created_at": "2026-05-26T15:46:25.700380",
+    "expires_at": "2026-05-28T15:46:25.700380",
+    "status": "TERMINATED",
+    "attempt_used": true,
+    "questions": [
+        "Can you explain the concept of TF-IDF and its application in Natural Language Processing?",
+        "How does the NumPy library in Python optimize numerical computations, and what are some of its key features?",
+        "What are the differences between supervised and unsupervised learning in Machine Learning, and how do you decide which approach to use?",
+        "How does the OpenCV library handle image processing, and what are some of its key applications?",
+        "Can you describe the architecture of your Movie Recommender System project, including the tech stack used and any challenges you faced?",
+        "How did you design the Face Recognition System, and what were some of the key considerations for ensuring accurate recognition?",
+        "What was the tech stack used for the Deepfake Detection System, and how did you handle any challenges that arose during development?",
+        "Can you walk us through your approach to web scraping in the context of one of your projects, including any data preprocessing steps you took?",
+        "Can you describe your role and responsibilities as an AI-ML Intern at Data Ingenious Global Ltd., Jaipur, and what you learned from the experience?",
+        "How did you contribute to the team during your internship, and what were some of the key projects you worked on?",
+        "Can you summarize the main contributions of your research publication, 'Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization'?",
+        "What motivated you to participate in HackSky'25, and how did you and your team approach the challenge to secure a top 15 spot out of 500+ teams?"
+    ],
+    "candidate": {
+        "skills": [
+            "C",
+            "C++",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "NumPy",
+            "Pandas",
+            "Matplotlib",
+            "OpenCV",
+            "FastAPI",
+            "DSA",
+            "Machine Learning",
+            "Natural Language Processing",
+            "TF-IDF",
+            "Cosine Similarity",
+            "Web Scraping",
+            "Data Preprocessing"
+        ],
+        "projects": [
+            "Movie Recommender System",
+            "Face Recognition System",
+            "Deepfake Detection System"
+        ],
+        "experience": [
+            "AI-ML Intern at Data Ingenious Global Ltd., Jaipur"
+        ],
+        "education": [
+            "B.Tech in Computer Science (AI-ML) from Manipal University Jaipur",
+            "Senior Secondary (Class XII) from Jayshree Periwal High School",
+            "Secondary (Class X) from India International School"
+        ],
+        "certifications": [
+            "Design and Analysis of Algorithms",
+            "Introduction to Machine Learning"
+        ],
+        "achievements": [
+            "Dean\u2019s List Holder for academic excellence",
+            "Secured Top 15 out of 500+ teams at HackSky'25"
+        ],
+        "research_publications": [
+            "Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization"
+        ],
+        "patents": [],
+        "co_curricular": []
+    },
+    "started_at": "2026-05-26T15:46:27.659004",
+    "terminated_at": "2026-05-26T15:47:34.634461",
+    "termination_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "proctoring": {
+        "session_id": "e1b8bfd6-1ca3-4abb-91b3-44701f0c952f",
+        "locked": true,
+        "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+        "fullscreen_warnings": 2,
+        "tab_warnings": 1,
+        "face_warnings": 2,
+        "pose_warnings": 0,
+        "face_detection_available": true,
+        "face_state": "ok",
+        "flags": [
+            {
+                "timestamp": "2026-05-26T15:46:37.885730",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {
+                    "count": 0
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:23.743954",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {
+                    "count": 0
+                }
+            }
+        ],
+        "events": [
+            {
+                "timestamp": "2026-05-26T15:46:30.662476",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:46:34.053546",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:46:37.885730",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {
+                    "count": 0
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:46:40.869478",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:46:44.920240",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:46:47.971668",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:00.359088",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:11.180170",
+                "question": "1",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:14.006721",
+                "question": "1",
+                "event_type": "tab_switch",
+                "details": {
+                    "message": "Candidate switched tab, minimized window, or changed app focus",
+                    "reason": "document_hidden"
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:23.743954",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {
+                    "count": 0
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:25.843227",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-26T15:47:33.795016",
+                "question": "2",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            }
+        ]
+    }
+}

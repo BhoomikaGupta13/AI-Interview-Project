@@ -1,0 +1,1 @@
+vectorization technique which is used to find a prayer word in a context in a document. It gives weightage to the words and are less frequent in a document and it helps us identify what word can be the next word in an entry. If idea faces one major repost that is women, it has.

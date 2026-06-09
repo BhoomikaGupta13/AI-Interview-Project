@@ -1,0 +1,1 @@
+With OpenCV, our video can be divided into multiple frames. You

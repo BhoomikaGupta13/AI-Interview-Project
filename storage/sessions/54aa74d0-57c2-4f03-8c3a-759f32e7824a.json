@@ -1,0 +1,197 @@
+{
+    "session_id": "54aa74d0-57c2-4f03-8c3a-759f32e7824a",
+    "created_at": "2026-05-27T12:18:30.780762",
+    "expires_at": "2026-05-29T12:18:30.780762",
+    "status": "TERMINATED",
+    "attempt_used": true,
+    "questions": [
+        "Can you explain the concept of TF-IDF and its application in Natural Language Processing?",
+        "How does the Cosine Similarity algorithm work, and what are its advantages in text similarity analysis?",
+        "What are the key differences between NumPy and Pandas, and how do you decide which one to use in a project?",
+        "How does OpenCV handle image processing, and what are some common techniques used for object detection?",
+        "Can you describe the architecture of your Movie Recommender System project, including the tech stack and any challenges you faced?",
+        "How did you design the Face Recognition System, and what were some of the key considerations for ensuring accuracy and security?",
+        "What was the tech stack used in your Deepfake Detection System, and how did you handle potential challenges such as data quality and model interpretability?",
+        "Can you walk us through your approach to building a content-based movie recommendation system, including any specific algorithms or techniques used?",
+        "During your internship at Data Ingenious Global Ltd., can you describe a typical day and some of the projects you worked on, including any notable achievements or challenges?",
+        "How did you contribute to the development of the real-time face recognition pipeline, and what were some of the key technical decisions made during the project?",
+        "Can you explain the research methodology and key findings of your publication 'Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization'?",
+        "What motivated you to participate in HackSky'25, and can you describe your experience and any notable achievements or takeaways from the event?"
+    ],
+    "candidate": {
+        "skills": [
+            "C",
+            "C++",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "NumPy",
+            "Pandas",
+            "Matplotlib",
+            "OpenCV",
+            "FastAPI",
+            "DSA",
+            "Machine Learning",
+            "Natural Language Processing",
+            "TF-IDF",
+            "Cosine Similarity",
+            "Web Scraping",
+            "Data Preprocessing",
+            "VS Code",
+            "Replit"
+        ],
+        "projects": [
+            "Movie Recommender System",
+            "Face Recognition System",
+            "Deepfake Detection System"
+        ],
+        "experience": [
+            {
+                "company": "Data Ingenious Global Ltd.",
+                "position": "AI-ML Intern",
+                "duration": "May 2025 - July 2025",
+                "achievements": [
+                    "Built a content-based movie recommendation system",
+                    "Developed a real-time face recognition pipeline"
+                ]
+            }
+        ],
+        "education": [
+            {
+                "institution": "Manipal University Jaipur",
+                "degree": "B.Tech in Computer Science (AI-ML)",
+                "cgpa": "9.91/10",
+                "duration": "Aug 2023 - Present"
+            },
+            {
+                "institution": "Jayshree Periwal High School",
+                "degree": "Senior Secondary (Class XII)",
+                "percentage": "90.8%",
+                "duration": "2020-2022"
+            },
+            {
+                "institution": "India International School",
+                "degree": "Secondary (Class X)",
+                "percentage": "95.6%",
+                "duration": "2019-2020"
+            }
+        ],
+        "certifications": [
+            "Design and Analysis of Algorithms",
+            "Introduction to Machine Learning"
+        ],
+        "achievements": [
+            "Dean\u2019s List Holder for academic excellence",
+            "Secured Top 15 out of 500+ teams at HackSky'25"
+        ],
+        "research_publications": [
+            {
+                "title": "Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization",
+                "publication": "Scientific Reports (Nature)",
+                "doi": "DOI"
+            }
+        ],
+        "patents": [],
+        "co_curricular": []
+    },
+    "started_at": "2026-05-27T12:18:34.105071",
+    "terminated_at": "2026-05-27T12:19:30.308735",
+    "termination_reason": "Interview closed after 2 fullscreen exit warnings.",
+    "proctoring": {
+        "session_id": "54aa74d0-57c2-4f03-8c3a-759f32e7824a",
+        "locked": true,
+        "lock_reason": "Interview closed after 2 fullscreen exit warnings.",
+        "fullscreen_warnings": 2,
+        "tab_warnings": 0,
+        "face_warnings": 1,
+        "pose_warnings": 0,
+        "face_detection_available": true,
+        "face_state": "ok",
+        "flags": [
+            {
+                "timestamp": "2026-05-27T12:18:37.806587",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {
+                    "count": 0
+                }
+            }
+        ],
+        "events": [
+            {
+                "timestamp": "2026-05-27T12:18:37.806587",
+                "question": "1",
+                "event_type": "no_face",
+                "details": {
+                    "count": 0
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:18:41.986866",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:18:45.489632",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:18:48.802334",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:18:52.811763",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:18:56.812651",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:19:07.680924",
+                "question": "1",
+                "event_type": "face_ok",
+                "details": {
+                    "count": 1
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:19:28.140460",
+                "question": "2",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            },
+            {
+                "timestamp": "2026-05-27T12:19:30.032896",
+                "question": "2",
+                "event_type": "fullscreen_exit",
+                "details": {
+                    "message": "Candidate exited fullscreen"
+                }
+            }
+        ]
+    }
+}

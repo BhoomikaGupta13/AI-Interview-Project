@@ -1,0 +1,304 @@
+{
+    "session_id": "94b2258b-f0ca-449c-a4fc-fa27f97979f3",
+    "overall_score": 3.73,
+    "band": "Weak",
+    "total_questions": 12,
+    "scored": 12,
+    "results": [
+        {
+            "question_no": 1,
+            "question_type": "project",
+            "question": "Can you explain the architecture of your Movie Recommender System project and how you implemented it?",
+            "answer": "In the movie recommender system project, I first went to get all the data from IMDb website for approximately 15 movies and then I stored them in our host-based scalable database. From that database, I made a content-based movie recommender system using TFIDF idea of vectorization and cosine similarity to find similar movies based on genre. And top 10 relevant movies are displayed to the user, according to their interest from lots of determinants.",
+            "status": "success",
+            "score": 3.51,
+            "band": "Weak",
+            "similarity": 8.1,
+            "llm_score": 7.0,
+            "depth_score": 1.0,
+            "clarity": 8,
+            "correctness": 7,
+            "completeness": 6,
+            "feedback": "The candidate explains the logic cleanly, but there's room for more detail on the system's architecture and implementation. They avoid using buzzwords deceptively and provide a clear overview of their approach.",
+            "strengths": [
+                "Accurately described the use of TFIDF and cosine similarity for content-based recommendation",
+                "Provided a clear high-level overview of the system's architecture"
+            ],
+            "improvements": [
+                "Lack of detail on data preprocessing and feature extraction",
+                "No mention of model evaluation metrics or hyperparameter tuning",
+                "Insufficient information on the scalable database and its implementation"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics and architectural justification."
+        },
+        {
+            "question_no": 2,
+            "question_type": "project",
+            "question": "What tech stack did you use for your Face Recognition System project and why did you choose those particular technologies?",
+            "answer": "For the Face Recognition System project, I used computer vision and the OpenCV library, in particular, which is a library of computer vision, that converts a video into different frames and processes all these labels. I also used Deep Convolutional Neural Networks, which crop the frame to the long-face dimensions so that we can detect the face features easily when lighting the eyes and also another feature of the system.",
+            "status": "success",
+            "score": 3.2,
+            "band": "Weak",
+            "similarity": 7.97,
+            "llm_score": 6.0,
+            "depth_score": 1.0,
+            "clarity": 6,
+            "correctness": 8,
+            "completeness": 4,
+            "feedback": "The candidate is explaining the logic cleanly, but lacks detail in their explanation. They are not using buzzwords deceptively, but rather explaining the mechanics of their Face Recognition System project in their own vocabulary.",
+            "strengths": [
+                "Accurate explanation of using OpenCV for computer vision",
+                "Mention of Deep Convolutional Neural Networks for face feature detection"
+            ],
+            "improvements": [
+                "Provide more details about the system architecture",
+                "Explain the reasoning behind choosing specific technologies",
+                "Discuss the challenges faced and how they were overcome"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics, architecture structures, and engineering optimization roadblocks. The response relied heavily on cognitive keywords without providing contextual integration or operational execution."
+        },
+        {
+            "question_no": 3,
+            "question_type": "project",
+            "question": "What were some of the challenges you faced while working on the Deepfake Detection System project and how did you overcome them?",
+            "answer": "While working on the Deepfake Detection System project, the main challenge that I faced was collecting a dataset that was AI-generated content, such as reading, text, and audio files. We created our own dataset because it was a hackathon project and we had limited time. We gathered a few videos from YouTube that were related, and for the text, we generated it from AI only.",
+            "status": "success",
+            "score": 3.63,
+            "band": "Weak",
+            "similarity": 7.81,
+            "llm_score": 5.0,
+            "depth_score": 2.25,
+            "clarity": 6,
+            "correctness": 4,
+            "completeness": 5,
+            "feedback": "The candidate provided a straightforward explanation of the challenge they faced, but lacked depth in their technical approach. They mentioned creating their own dataset, but did not elaborate on the specifics of how they generated the AI content or the techniques used for deepfake detection.",
+            "strengths": [
+                "Identified the challenge of collecting a suitable dataset",
+                "Mentioned creating their own dataset as a solution"
+            ],
+            "improvements": [
+                "Provide more technical details on the dataset generation process",
+                "Explain the deepfake detection techniques used in the project",
+                "Discuss any machine learning models or algorithms employed"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics and architectural justification. The response failed to provide a clear breakdown of the system's architecture, and the challenges discussed were not thoroughly explored or optimized."
+        },
+        {
+            "question_no": 4,
+            "question_type": "project",
+            "question": "How did you design the system architecture for the HackSky'25 project and what were some of the key considerations you had to keep in mind?",
+            "answer": "But the HackSky project, I mean, the Detection Project, and that's for the project which was basically dedicating AI to detect fake videos for real videos.",
+            "status": "success",
+            "score": 1.41,
+            "band": "Weak",
+            "similarity": 6.11,
+            "llm_score": 2.67,
+            "depth_score": 0.0,
+            "clarity": 4,
+            "correctness": 2,
+            "completeness": 2,
+            "feedback": "The candidate seems to be using buzzwords deceptively and is not explaining the logic cleanly. They are dropping project names and concepts without providing a clear explanation of the system architecture or design considerations.",
+            "strengths": [],
+            "improvements": [
+                "Provide a clear explanation of the system architecture",
+                "Describe the key design considerations for the HackSky'25 project",
+                "Explain the role of AI in detecting fake videos"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking any concrete technical insights, architectural breakdown, or engineering challenges. The response failed to provide a meaningful explanation of the system architecture for the HackSky'25 project."
+        },
+        {
+            "question_no": 5,
+            "question_type": "skill",
+            "question": "Can you explain the concept of TF-IDF and how it's used in Natural Language Processing, including its strengths and weaknesses?",
+            "answer": "TF-IDF is a vectorization technique which is used to find a key word in a context in a document. It gives weightage to the words that are less frequent in a document and it helps us identify what word can be the next word in a sentence. If I recall, one major issue that it faces is that it has limitations, for instance, it may not work well with words that are rare or out of vocabulary.",
+            "status": "success",
+            "score": 5.42,
+            "band": "Weak",
+            "similarity": 8.31,
+            "llm_score": 4.67,
+            "depth_score": 1.25,
+            "clarity": 6,
+            "correctness": 4,
+            "completeness": 4,
+            "feedback": "The candidate is explaining the logic of TF-IDF cleanly but lacks depth in their explanation. They are not using buzzwords deceptively, but their understanding of the concept seems limited.",
+            "strengths": [
+                "Identified TF-IDF as a vectorization technique",
+                "Recognized the importance of word frequency in the document"
+            ],
+            "improvements": [
+                "Provide a more detailed explanation of how TF-IDF calculates word importance",
+                "Discuss the strengths and weaknesses of TF-IDF in NLP applications",
+                "Explain how TF-IDF handles rare or out-of-vocabulary words in more detail"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics, architecture structures, and operational execution. The response failed to provide a clear breakdown of TF-IDF's strengths and weaknesses, and the project profile does not seem to be directly related to the question asked."
+        },
+        {
+            "question_no": 6,
+            "question_type": "skill",
+            "question": "How does the NumPy library handle multi-dimensional arrays and what are some of its key features and benefits?",
+            "answer": "NumPy is a Python library that is used to handle multiple dimensional arrays using NumPy arrays, because many of the functions in NumPy can be handled with complex matrices and arrays very efficiently. The first normal Python handles the list only, but NumPy allows it to be handled in an efficient model.",
+            "status": "success",
+            "score": 5.37,
+            "band": "Weak",
+            "similarity": 8.24,
+            "llm_score": 4.67,
+            "depth_score": 1.0,
+            "clarity": 6,
+            "correctness": 4,
+            "completeness": 4,
+            "feedback": "The candidate is using some relevant keywords, but the explanation is not entirely clear and lacks specific details about NumPy's key features and benefits. They seem to understand the basic difference between NumPy arrays and Python lists, but the explanation is not concise or well-structured.",
+            "strengths": [
+                "Recognizes the difference between NumPy arrays and Python lists",
+                "Mentions efficiency in handling complex matrices and arrays"
+            ],
+            "improvements": [
+                "Provide more specific examples of NumPy's key features, such as broadcasting, vectorized operations, and array indexing",
+                "Explain how NumPy arrays are more efficient than Python lists for numerical computations",
+                "Discuss the benefits of using NumPy in various applications, such as scientific computing, data analysis, and machine learning"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics and failing to provide a meaningful breakdown of NumPy's architecture or its applications in their projects."
+        },
+        {
+            "question_no": 7,
+            "question_type": "skill",
+            "question": "What is the difference between supervised and unsupervised learning in Machine Learning, and can you give an example of each?",
+            "answer": "In supervised learning, labeled data is given for both input and output. And for unsupervised learning, the ability to do is not the same, I mean, the data is not labeled, so we have to find patterns or relationships in the data. For example, in supervised learning, we can use regression or classification algorithms, whereas in unsupervised learning, we can use clustering or dimensionality reduction.",
+            "status": "success",
+            "score": 7.42,
+            "band": "Good",
+            "similarity": 9.08,
+            "llm_score": 7.67,
+            "depth_score": 1.0,
+            "clarity": 8,
+            "correctness": 8,
+            "completeness": 7,
+            "feedback": "The candidate is explaining the logic cleanly, but could provide more detailed examples and explanations to support their points.",
+            "strengths": [
+                "accurate distinction between supervised and unsupervised learning",
+                "identification of relevant algorithms for each type of learning"
+            ],
+            "improvements": [
+                "providing more specific examples of supervised and unsupervised learning applications",
+                "explaining the underlying mechanics of the algorithms mentioned"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics, architecture structures, and engineering optimization roadblocks. The response relied heavily on cognitive keywords without providing contextual integration or operational execution."
+        },
+        {
+            "question_no": 8,
+            "question_type": "project",
+            "question": "Can you describe the process of data preprocessing and how you've applied it in your projects, including handling missing values and outliers?",
+            "answer": "I use dropout and regularization methods. In these methods, I find the number I use in the mean for the mode of the column. It helped in handling missing values and for the outliers I used normalization techniques like L1 and L2.",
+            "status": "success",
+            "score": 2.29,
+            "band": "Weak",
+            "similarity": 6.95,
+            "llm_score": 3.33,
+            "depth_score": 1.0,
+            "clarity": 4,
+            "correctness": 2,
+            "completeness": 4,
+            "feedback": "The candidate seems to be using buzzwords like 'dropout', 'regularization', 'L1', and 'L2' without properly explaining their context in data preprocessing. They also incorrectly applied these concepts to handling missing values and outliers.",
+            "strengths": [],
+            "improvements": [
+                "properly explaining data preprocessing techniques",
+                "accurately handling missing values and outliers",
+                "understanding the correct application of dropout, regularization, L1, and L2 in machine learning"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical mechanics and failing to provide a clear structural breakdown of their data preprocessing approach."
+        },
+        {
+            "question_no": 9,
+            "question_type": "experience",
+            "question": "Can you walk me through your experience as an AI-ML Intern at Data Ingenious Global Ltd., Jaipur, including your responsibilities and accomplishments?",
+            "answer": "I worked on two projects, first was a New Year prediction system project and then one was a recommender system project. I made these projects under the guidance of an internal team and through all the projects I was given, I received additional guidance which helped me gain many insights.",
+            "status": "success",
+            "score": 1.99,
+            "band": "Weak",
+            "similarity": 5.88,
+            "llm_score": 4.67,
+            "depth_score": 0.0,
+            "clarity": 6,
+            "correctness": 4,
+            "completeness": 4,
+            "feedback": "The candidate is not using buzzwords deceptively but is explaining the logic cleanly. However, the explanation lacks specific technical details and depth.",
+            "strengths": [
+                "Mentioned working on projects under guidance",
+                "Attempted to explain project experiences"
+            ],
+            "improvements": [
+                "Provide more technical details about the projects",
+                "Explain the mechanics of the New Year prediction system and recommender system",
+                "Mention specific skills or technologies used in the projects"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical details, and failed to provide a meaningful breakdown of their projects, responsibilities, or accomplishments."
+        },
+        {
+            "question_no": 10,
+            "question_type": "experience",
+            "question": "What were some of the key takeaways from your experience working at Data Ingenious Global Ltd., Jaipur, and how did it help you grow professionally?",
+            "answer": "Okay, so I worked at Data Ingenious Global Ltd. in Jaipur, and I think some key takeaways from that experience were, I got to work on a lot of projects, and it really helped me grow professionally, I was able to learn a lot of new things, and I got to work with a great team, so overall it was a really good experience.",
+            "status": "success",
+            "score": 1.58,
+            "band": "Weak",
+            "similarity": 7.77,
+            "llm_score": 2.67,
+            "depth_score": 0.0,
+            "clarity": 4,
+            "correctness": 2,
+            "completeness": 2,
+            "feedback": "The candidate's response lacks specific details and relies on general statements, indicating potential use of buzzwords without clear explanation of the underlying logic.",
+            "strengths": [],
+            "improvements": [
+                "Provide concrete examples of projects worked on",
+                "Explain the technical challenges faced and how they were overcome",
+                "Describe the skills learned and how they were applied"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical insights, and failing to provide a meaningful breakdown of their experience at Data Ingenious Global Ltd."
+        },
+        {
+            "question_no": 11,
+            "question_type": "skill",
+            "question": "Can you explain the main contributions and findings of your research publication 'Intelligent Pavement Management: A Machine Learning Framework for Condition Classification and Maintenance Prioritization' and its potential impact on the field?",
+            "answer": "This research paper, I trained each different model, including random forest, XGBoost, and neural networks, for testing, to determine which one performed best on the asphalt concrete pavements.",
+            "status": "success",
+            "score": 3.88,
+            "band": "Weak",
+            "similarity": 7.28,
+            "llm_score": 2.67,
+            "depth_score": 1.0,
+            "clarity": 4,
+            "correctness": 2,
+            "completeness": 2,
+            "feedback": "The candidate is using buzzwords like 'random forest', 'XGBoost', and 'neural networks' without explaining their relevance to the research publication or the problem of pavement management. The answer lacks depth and context, indicating a potential lack of understanding of the research contributions and findings.",
+            "strengths": [],
+            "improvements": [
+                "Explain the research methodology and its significance",
+                "Discuss the main contributions and findings of the publication",
+                "Describe the potential impact of the research on the field of pavement management"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical insights and failing to provide a meaningful breakdown of the research publication's contributions and findings."
+        },
+        {
+            "question_no": 12,
+            "question_type": "skill",
+            "question": "How does your achievement of being a Dean's List Holder for academic excellence reflect your skills and abilities as a candidate, and what did you do to achieve this recognition?",
+            "answer": "I'm proud to have achieved being a Dean's List Holder for academic excellence. To achieve this recognition, I worked hard and stayed focused on my studies. I set goals for myself and made sure to prioritize my tasks to manage my time effectively. Throughout my academic career, I have developed strong study habits, such as creating detailed notes and studying regularly, which helped me to excel in my courses. I believe that my ability to work diligently and persevere through challenges reflects my skills and abilities as a candidate, demonstrating that I am capable of achieving my goals and striving for excellence in my pursuits.",
+            "status": "success",
+            "score": 5.24,
+            "band": "Weak",
+            "similarity": 8.13,
+            "llm_score": 4.67,
+            "depth_score": 0.0,
+            "clarity": 8,
+            "correctness": 2,
+            "completeness": 4,
+            "feedback": "The candidate is using general terms and buzzwords like 'worked hard', 'stayed focused', and 'prioritize my tasks' without explaining the specific skills or technical knowledge they applied to achieve academic excellence. The answer lacks concrete examples and technical details.",
+            "strengths": [],
+            "improvements": [
+                "Provide specific examples of technical skills or knowledge applied to achieve academic excellence",
+                "Explain how their academic achievements translate to technical skills relevant to the profile baseline"
+            ],
+            "depth_feedback": "The candidate demonstrated surface-level pattern mimicking, lacking concrete technical details and failing to provide a meaningful connection between their academic achievement and engineering skills."
+        }
+    ]
+}

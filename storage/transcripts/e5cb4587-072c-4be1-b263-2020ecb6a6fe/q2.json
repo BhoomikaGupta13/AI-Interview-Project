@@ -1,0 +1,28 @@
+{
+    "session_id": "e5cb4587-072c-4be1-b263-2020ecb6a6fe",
+    "question": "q2",
+    "language": "en",
+    "full_text": "so, how does numpy numpy library in python optimise numerical computations and what are some of its key features? so, numpy is a library in python that is used for array operations such as np.array so",
+    "transcript": [
+        {
+            "start": 1.16,
+            "end": 7.76,
+            "text": "So, how does the NumPy library in Python optimise numerical computations and what are some of"
+        },
+        {
+            "start": 7.76,
+            "end": 8.66,
+            "text": "its key features?"
+        },
+        {
+            "start": 9.28,
+            "end": 22.3,
+            "text": "So, NumPy is a library in Python that is used for array operations such as np.array so"
+        }
+    ],
+    "question_no": 2,
+    "video_path": "storage\\recordings\\e5cb4587-072c-4be1-b263-2020ecb6a6fe\\q2.webm",
+    "audio_path": "storage\\audio\\e5cb4587-072c-4be1-b263-2020ecb6a6fe\\q2.wav",
+    "transcription_audio_path": "storage\\audio\\e5cb4587-072c-4be1-b263-2020ecb6a6fe\\q2_enhanced.wav",
+    "proctor_flags": []
+}
