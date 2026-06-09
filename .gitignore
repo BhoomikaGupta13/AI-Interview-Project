@@ -3,3 +3,4 @@ __pycache__/
 .env
 *.pyc
 storage/
+audio_test_outputs/

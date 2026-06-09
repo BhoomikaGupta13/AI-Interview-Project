@@ -1,1 +1,0 @@
-to explain the concept of TFIDF and its application in natural language processing. So TFIDF is a type of vectorization which is used to find the career words among the context words in a document mostly used in NLP.
