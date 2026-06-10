@@ -34,10 +34,6 @@ except Exception as e:
     raise e
 
 
-# -------------------------------------------------------------------------
-# BACKWARD COMPATIBILITY CLASS INTERFACE
-# This guarantees that 'from vision_processor import detector' won't crash server.py
-# -------------------------------------------------------------------------
 class LegacyDetectorBridge:
     def detect(self, img) -> int:
         """Mimics your original yolo_face.py detector behavior."""
@@ -53,7 +49,6 @@ class LegacyDetectorBridge:
             )
 
 
-# Instantiate the object name expected by your server imports
 detector = LegacyDetectorBridge()
 
 
@@ -77,7 +72,7 @@ def process_proctoring_frame(
         }
 
     # -------------------------------------------------------------------------
-    # FEATURE 1: Face Tracking Execution (UNTOUCHED PREVIOUS CORE)
+    # FEATURE 1: Face Tracking Execution
     # -------------------------------------------------------------------------
     face_results = face_model(frame, verbose=False)
     face_count = (
@@ -85,11 +80,10 @@ def process_proctoring_frame(
     )
 
     # -------------------------------------------------------------------------
-    # FEATURE 2: Phone Tracking Execution (UPGRADED YOLOv8s BACKEND)
+    # FEATURE 2: Phone Tracking Execution
     # -------------------------------------------------------------------------
     phone_detected = False
 
-    # Run predictions with slightly lowered confidence threshold and augmented sizing
     general_results = general_model.predict(
         frame,
         conf=phone_conf_threshold,

@@ -35,7 +35,8 @@ from backend.auth.auth import require_candidate_login
 
 init_db()
 
-st.set_page_config(page_title="AI Interview System", layout="wide")
+if __name__ != "__portal__":
+    st.set_page_config(page_title="AI Interview System", layout="wide")
 st.title("AI Interview System")
 
 # ── Candidate login gate ──────────────────────────────────────────────────────

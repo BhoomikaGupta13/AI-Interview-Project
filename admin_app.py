@@ -8,13 +8,15 @@ from backend.auth.auth import require_admin_login
 from backend.db.queries import (
     get_all_candidates,
     create_candidate,
+    delete_candidate,
     get_score_by_session,
 )
 from backend.db.database import init_db, get_conn
 
 init_db()
 
-st.set_page_config(page_title="Admin — AI Interview System", layout="wide")
+if __name__ != "__portal__":
+    st.set_page_config(page_title="Admin — AI Interview System", layout="wide")
 st.title("Admin panel")
 
 require_admin_login()
@@ -63,6 +65,45 @@ with tab1:
             df[[c for c in summary_cols if c in df.columns]],
             use_container_width=True,
         )
+
+        st.divider()
+        st.subheader("Delete candidate credentials")
+        st.caption(
+            "Deleting a candidate removes their login credentials and any linked interview records."
+        )
+
+        for r in cleaned_rows:
+            username = r["username"]
+            full_name = r.get("full_name") or "-"
+            email = r.get("email") or "-"
+            done = "Completed" if r.get("interview_done") else "Not completed"
+            pending_key = f"confirm_delete_{username}"
+
+            delete_col, name_col, email_col, status_col = st.columns([1, 3, 4, 2])
+            with delete_col:
+                if st.button("Delete", key=f"delete_{username}"):
+                    st.session_state[pending_key] = True
+            name_col.markdown(f"**{username}**  \n{full_name}")
+            email_col.write(email)
+            status_col.write(done)
+
+            if st.session_state.get(pending_key):
+                st.warning(
+                    f"Confirm deletion of candidate credentials for '{username}'. "
+                    "This cannot be undone."
+                )
+                confirm_col, cancel_col = st.columns([1, 5])
+                if confirm_col.button("Confirm", key=f"confirm_{username}"):
+                    deleted = delete_candidate(username)
+                    st.session_state.pop(pending_key, None)
+                    if deleted.get("candidates"):
+                        st.success(f"Deleted candidate '{username}'.")
+                    else:
+                        st.warning(f"Candidate '{username}' was not found.")
+                    st.rerun()
+                if cancel_col.button("Cancel", key=f"cancel_{username}"):
+                    st.session_state.pop(pending_key, None)
+                    st.rerun()
 
         st.divider()
         st.subheader("Per-candidate detail")
