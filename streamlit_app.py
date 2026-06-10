@@ -29,6 +29,7 @@ from backend.db.queries import (
     save_score,
     save_questions_answers,
     mark_interview_done,
+    mark_interview_started,
 )
 from backend.auth.auth import require_candidate_login
 
@@ -225,6 +226,7 @@ if resume:
                 # ── DB: set started_at exactly once ───────────────────────────
                 if not st.session_state["db_started_set"]:
                     set_session_started(session["session_id"])
+                    mark_interview_started(username)
                     st.session_state["db_started_set"] = True
 
                 st.rerun()

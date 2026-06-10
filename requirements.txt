@@ -41,6 +41,7 @@ jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 markdown-it-py==4.2.0
 MarkupSafe==3.0.3
+mediapipe>=0.10.14
 mdurl==0.1.2
 narwhals==2.21.2
 numpy==2.4.6
