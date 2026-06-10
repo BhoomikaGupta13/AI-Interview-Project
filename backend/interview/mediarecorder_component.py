@@ -130,7 +130,9 @@ def media_recorder_component(
           + "/2 | tab: "
           + (p.tab_warnings || 0)
           + "/3 | face: "
-          + (p.face_warnings || 0),
+          + (p.face_warnings || 0)
+          + " | device: "
+          + (p.phone_warnings || 0), // Clear layout addition to track phone status live
 
           p.locked
           ?
@@ -573,6 +575,7 @@ def media_recorder_component(
                   return;
               }}
               const form = new FormData();
+              form.append("session", SESSION);
               form.append("frame", blob, "f.jpg");
 
               try {{
@@ -588,6 +591,25 @@ def media_recorder_component(
                       return;
                   }}
 
+                  // ── Phone detection (evaluated every frame, no debounce needed) ──
+                  if (j.phone_detected) {{
+                      proctor("⚠ Unauthorized device detected!", "#7f1d1d");
+                  }}
+
+                  // ── Update full proctor display if server returned snapshot ──
+                  if (j.proctor) {{
+                      updateProctorDisplay(j.proctor);
+                      if (j.proctor.locked) {{
+                          stopRecording();
+                          stopCamera();
+                          hidePageGate();
+                          showOverlay(j.proctor.lock_reason || "Interview locked.", false);
+                          R.faceDetectInFlight = false;
+                          return;
+                      }}
+                  }}
+
+                  // ── Face state machine (debounced to 4 stable frames) ──
                   let state = "ok";
                   if (j.faces === 0) state = "no_face";
                   else if (j.faces > 1) state = "multiple_faces";

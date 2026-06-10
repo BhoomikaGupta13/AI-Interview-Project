@@ -1,5 +1,5 @@
 # admin_app.py
-# Run with:  streamlit run admin_app.py --server.port 8502
+# Run with: streamlit run admin_app.py --server.port 8502
 
 import json
 import streamlit as st
@@ -73,7 +73,7 @@ with tab1:
 
         if selected:
             matching = [r for r in cleaned_rows if r["username"] == selected]
-            if matching and matching[0].get("overall_score") is not "Not Scored":
+            if matching and matching[0].get("overall_score") != "Not Scored":
 
                 # Fetch full_report from the scores table on demand
                 with get_conn() as conn:
@@ -110,7 +110,80 @@ with tab1:
                     m2.metric("Successfully Scored", report.get("scored", 0))
                     m3.metric("Candidate Band", report.get("band", "Weak"))
 
+                    # ── NEW FEATURE ADDTION: REAL-TIME PROCTORING MONITORING BLOCK ──
+                    st.divider()
+                    st.subheader("🛡️ Anti-Cheating & Proctoring Report")
+
+                    # Fetch proctoring data live for the active session identifier from PostgreSQL
+                    with get_conn() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                """
+                                SELECT fullscreen_warnings, tab_warnings, face_warnings, phone_warnings, locked, lock_reason
+                                FROM proctoring_flags 
+                                WHERE session_id = %s
+                                """,
+                                (session_id,),
+                            )
+                            proctor_row = cur.fetchone()
+
+                    # Map the raw SQL tuple array back into an accessible dashboard metrics state dictionary
+                    if proctor_row:
+                        proctor_data = {
+                            "fullscreen_warnings": proctor_row[0],
+                            "tab_warnings": proctor_row[1],
+                            "face_warnings": proctor_row[2],
+                            "phone_warnings": proctor_row[3],
+                            "locked": proctor_row[4],
+                            "lock_reason": proctor_row[5],
+                        }
+                    else:
+                        proctor_data = {
+                            "fullscreen_warnings": 0,
+                            "tab_warnings": 0,
+                            "face_warnings": 0,
+                            "phone_warnings": 0,
+                            "locked": False,
+                            "lock_reason": "",
+                        }
+
+                    # Render out four distinct metric columns representing overall workspace security metrics
+                    p1, p2, p3, p4 = st.columns(4)
+                    p1.metric(
+                        label="Fullscreen Breaks",
+                        value=f"{proctor_data.get('fullscreen_warnings', 0)} / 2",
+                    )
+                    p2.metric(
+                        label="Tab Switches",
+                        value=f"{proctor_data.get('tab_warnings', 0)} / 3",
+                    )
+                    p3.metric(
+                        label="Facial Anomalies",
+                        value=f"{proctor_data.get('face_warnings', 0)} / 3",
+                    )
+                    p4.metric(
+                        label="Device Detections (Phones)",
+                        value=f"{proctor_data.get('phone_warnings', 0)} / 2",
+                        delta=(
+                            "Violation Logged"
+                            if proctor_data.get("phone_warnings", 0) > 0
+                            else None
+                        ),
+                        delta_color="inverse",
+                    )
+
+                    if proctor_data.get("locked"):
+                        st.error(
+                            f"🚨 **Session Terminated/Locked Out:** {proctor_data.get('lock_reason', 'Security breach threshold reached.')}"
+                        )
+                    else:
+                        st.success(
+                            "✅ Session context is clear. No terminal lock thresholds breached."
+                        )
+                    # ─────────────────────────────────────────────────────────────────
+
                     # 2. Per-Question Score Matrix Table Breakdown
+                    st.divider()
                     st.subheader("📋 Per-Question Score Matrix")
 
                     matrix_data = []
@@ -194,8 +267,6 @@ with tab1:
                 st.info("No scores or evaluated session data found for this candidate.")
 
 # ── Tab 2: Create candidate ───────────────────────────────────────────────────
-# admin_app.py (Inside Tab 2: Create candidate component section)
-
 with tab2:
     st.subheader("Create candidate credentials")
     with st.form("create_candidate_form"):
@@ -221,7 +292,7 @@ with tab2:
                     f"Candidate profile **{username_input}** committed successfully to PostgreSQL."
                 )
 
-                # ── NEW AUTOMATED EMAIL DISPATCH TRIGGER ──────────────────────
+                # ── AUTOMATED EMAIL DISPATCH TRIGGER ──────────────────────
                 with st.spinner(
                     "📧 Syncing secure message dispatch with SMTP relays..."
                 ):
@@ -249,6 +320,3 @@ with tab2:
                 st.warning(
                     f"Username '{username_input}' already exists in candidates base database."
                 )
-
-
-# streamlit run admin_app.py --server.port 8502

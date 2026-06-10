@@ -17,11 +17,17 @@ from pathlib import Path
 from typing import Any
 
 import cv2
-from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 import numpy as np
 import uvicorn
+from backend.proctoring.vision_processor import process_proctoring_frame, detector
+from backend.db.queries import save_proctoring, get_conn
+
+MAX_FACE_WARNINGS = 3
+MAX_PHONE_WARNINGS = 2
+
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s"
@@ -86,22 +92,100 @@ def _json(data: dict[str, Any], status_code: int = 200) -> JSONResponse:
 
 
 @app.post("/detect_faces")
-async def detect_faces(frame: UploadFile | None = File(default=None)):
+async def detect_faces(
+    request: Request,
+    frame: UploadFile | None = File(default=None),
+    session: str = Form(default=""),
+):
+    """
+    Unified face + phone proctoring endpoint.
+    Session is accepted as a form field (primary) or parsed from referer (fallback).
+    Uses process_proctoring_frame() for phone detection — same engine, same thresholds.
+    """
     try:
         if not frame:
-            return {"status": "failed"}
+            return {"status": "failed", "faces": 0, "phone_detected": False}
 
+        # 1. Read raw bytes — pass directly to process_proctoring_frame (avoids double decode)
         raw = await frame.read()
-        img = np.frombuffer(raw, np.uint8)
-        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
-        from backend.proctoring.yolo_face import detector
 
-        faces = detector.detect(img)
+        # 2. Run BOTH face + phone detection through the single authoritative pipeline
+        result = process_proctoring_frame(raw, phone_conf_threshold=0.28)
 
-        return {"status": "success", "faces": faces}
+        if result.get("status") != "success":
+            return {"status": "failed", "faces": 0, "phone_detected": False}
+
+        faces = result["faces"]
+        phone_detected = result["phone_detected"]
+
+        # 3. Resolve Session ID: form field is most reliable; referer is fallback
+        session = session.strip()
+        if not session:
+            referer = request.headers.get("referer", "")
+            if "session=" in referer:
+                session = referer.split("session=")[-1].split("&")[0].strip()
+
+        # 4. Persist warnings if session is resolvable
+        if session and _valid_session(session):
+            data = _load_proctor(session)
+
+            # --- Phone warning (evaluated first; independent of face state) ---
+            if phone_detected:
+                previous_phone_state = data.get("phone_state", "ok")
+                if previous_phone_state == "ok":
+                    # Only increment on state transition (ok → detected), not every frame
+                    data["phone_warnings"] = data.get("phone_warnings", 0) + 1
+                    data["phone_state"] = "detected"
+                    logger.warning(
+                        f"[Proctor] Phone warning #{data['phone_warnings']} for session {session}"
+                    )
+                    if data["phone_warnings"] >= MAX_PHONE_WARNINGS:
+                        data["locked"] = True
+                        data["lock_reason"] = (
+                            "Interview locked after unauthorized device (phone) detected."
+                        )
+            else:
+                # Phone no longer in frame — reset state so next appearance counts again
+                data["phone_state"] = "ok"
+
+            # --- Face warning (independent of phone) ---
+            face_state = "ok"
+            if faces == 0:
+                face_state = "no_face"
+            elif faces > 1:
+                face_state = "multiple_faces"
+
+            previous_face_state = data.get("face_state", "ok")
+            data["face_state"] = face_state
+            if face_state != "ok" and previous_face_state == "ok":
+                data["face_warnings"] += 1
+                if data["face_warnings"] >= MAX_FACE_WARNINGS:
+                    data["locked"] = True
+                    data["lock_reason"] = (
+                        "Interview locked after repeated face violations."
+                    )
+
+            _save_proctor(session, data)
+
+        # 5. Return detection result + current proctor snapshot to the frontend
+        proctor_data = (
+            _load_proctor(session) if (session and _valid_session(session)) else {}
+        )
+        return {
+            "status": "success",
+            "faces": faces,
+            "phone_detected": phone_detected,
+            "proctor": proctor_data,
+        }
 
     except Exception as exc:
-        return {"status": "error", "message": str(exc)}
+        logger.exception("Error in secure detect_faces endpoint execution loop")
+        return {
+            "status": "error",
+            "message": str(exc),
+            "faces": 1,
+            "phone_detected": False,
+        }
 
 
 @app.get("/ping")
