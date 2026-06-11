@@ -2,7 +2,6 @@ import subprocess
 import sys
 import time
 
-
 COMMANDS = [
     [sys.executable, "server.py"],
     [
@@ -45,3 +44,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#  python run_portal.py

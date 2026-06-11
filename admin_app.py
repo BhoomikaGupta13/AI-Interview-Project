@@ -15,6 +15,22 @@ from backend.db.database import init_db, get_conn
 
 init_db()
 
+
+def _is_valid_email(email: str) -> bool:
+    """
+    Quick client-side syntax pre-check using the same library as the mailer,
+    so the error surfaces immediately without a network call.
+    The mailer will then also run a live DNS/MX check before any SMTP attempt.
+    """
+    from email_validator import validate_email, EmailNotValidError
+
+    try:
+        validate_email(email.strip(), check_deliverability=False)
+        return True
+    except EmailNotValidError:
+        return False
+
+
 if __name__ != "__portal__":
     st.set_page_config(page_title="Admin — AI Interview System", layout="wide")
 st.title("Admin panel")
@@ -44,48 +60,42 @@ with tab1:
                 del rc["full_report"]  # Delete the raw text dump completely
             cleaned_rows.append(rc)
 
-        df = pd.DataFrame(cleaned_rows)
-
-        # Clean up overall score visualization in the master list dataframe view
-        if "overall_score" in df.columns:
-            df["overall_score"] = df["overall_score"].apply(
-                lambda x: f"{x:.2f} / 10" if pd.notnull(x) else "Not Scored"
-            )
-
-        summary_cols = [
-            "username",
-            "full_name",
-            "email",
-            "interview_done",
-            "overall_score",
-            "band",
-            "scored_at",
-        ]
-        st.dataframe(
-            df[[c for c in summary_cols if c in df.columns]],
-            use_container_width=True,
-        )
-
-        st.divider()
-        st.subheader("Delete candidate credentials")
-        st.caption(
-            "Deleting a candidate removes their login credentials and any linked interview records."
-        )
+        header_cols = st.columns([2, 3, 3, 2, 2, 1])
+        header_cols[0].markdown("**Username**")
+        header_cols[1].markdown("**Name**")
+        header_cols[2].markdown("**Email**")
+        header_cols[3].markdown("**Interview**")
+        header_cols[4].markdown("**Score**")
+        header_cols[5].markdown("**Delete**")
 
         for r in cleaned_rows:
             username = r["username"]
             full_name = r.get("full_name") or "-"
             email = r.get("email") or "-"
-            done = "Completed" if r.get("interview_done") else "Not completed"
+            status = r.get("interview_status") or "NOT_STARTED"
+            done = (
+                "Completed"
+                if r.get("interview_done")
+                else status.replace("_", " ").title()
+            )
+            score = (
+                f"{r['overall_score']:.2f} / 10"
+                if r.get("overall_score") is not None
+                else "Not Scored"
+            )
+            if r.get("band"):
+                score = f"{score} ({r['band']})"
             pending_key = f"confirm_delete_{username}"
 
-            delete_col, name_col, email_col, status_col = st.columns([1, 3, 4, 2])
-            with delete_col:
+            row_cols = st.columns([2, 3, 3, 2, 2, 1])
+            row_cols[0].markdown(f"**{username}**")
+            row_cols[1].write(full_name)
+            row_cols[2].write(email)
+            row_cols[3].write(done)
+            row_cols[4].write(score)
+            with row_cols[5]:
                 if st.button("Delete", key=f"delete_{username}"):
                     st.session_state[pending_key] = True
-            name_col.markdown(f"**{username}**  \n{full_name}")
-            email_col.write(email)
-            status_col.write(done)
 
             if st.session_state.get(pending_key):
                 st.warning(
@@ -114,7 +124,7 @@ with tab1:
 
         if selected:
             matching = [r for r in cleaned_rows if r["username"] == selected]
-            if matching and matching[0].get("overall_score") != "Not Scored":
+            if matching and matching[0].get("overall_score") is not None:
 
                 # Fetch full_report from the scores table on demand
                 with get_conn() as conn:
@@ -151,11 +161,10 @@ with tab1:
                     m2.metric("Successfully Scored", report.get("scored", 0))
                     m3.metric("Candidate Band", report.get("band", "Weak"))
 
-                    # ── NEW FEATURE ADDTION: REAL-TIME PROCTORING MONITORING BLOCK ──
+                    # ── REAL-TIME PROCTORING MONITORING BLOCK ──
                     st.divider()
                     st.subheader("🛡️ Anti-Cheating & Proctoring Report")
 
-                    # Fetch proctoring data live for the active session identifier from PostgreSQL
                     with get_conn() as conn:
                         with conn.cursor() as cur:
                             cur.execute(
@@ -168,7 +177,6 @@ with tab1:
                             )
                             proctor_row = cur.fetchone()
 
-                    # Map the raw SQL tuple array back into an accessible dashboard metrics state dictionary
                     if proctor_row:
                         proctor_data = {
                             "fullscreen_warnings": proctor_row[0],
@@ -188,7 +196,6 @@ with tab1:
                             "lock_reason": "",
                         }
 
-                    # Render out four distinct metric columns representing overall workspace security metrics
                     p1, p2, p3, p4 = st.columns(4)
                     p1.metric(
                         label="Fullscreen Breaks",
@@ -221,7 +228,6 @@ with tab1:
                         st.success(
                             "✅ Session context is clear. No terminal lock thresholds breached."
                         )
-                    # ─────────────────────────────────────────────────────────────────
 
                     # 2. Per-Question Score Matrix Table Breakdown
                     st.divider()
@@ -271,7 +277,7 @@ with tab1:
 
                     st.divider()
 
-                    # 4. Deep Expandable Feedback Breakdown (Kept under interactive accordions)
+                    # 4. Deep Expandable Feedback Breakdown
                     st.subheader("🔍 Contextual Answer & Critique Logs")
                     for r in report.get("results", []):
                         q_no = r["question_no"]
@@ -308,6 +314,8 @@ with tab1:
                 st.info("No scores or evaluated session data found for this candidate.")
 
 # ── Tab 2: Create candidate ───────────────────────────────────────────────────
+# Replace ONLY the with tab2: block inside admin_app.py
+
 with tab2:
     st.subheader("Create candidate credentials")
     with st.form("create_candidate_form"):
@@ -322,42 +330,46 @@ with tab2:
             st.error(
                 "Username, password, and destination email address fields are required."
             )
-        else:
-            # 1. Commit the tracking login row parameters to PostgreSQL
-            ok = create_candidate(
-                username_input, password_input, full_name_input, email_input, "admin"
+        elif not _is_valid_email(email_input):
+            st.error(
+                "⚠️ Invalid email address format. "
+                "Please enter a valid address (e.g. name@domain.com)."
             )
+        else:
+            # ── UPGRADED ORDER OF OPERATIONS (Email verification triggers FIRST) ──
+            with st.spinner(
+                "📧 Verifying deliverability and coordinating SMTP connection..."
+            ):
+                from backend.utils.mailer import send_welcome_email
 
-            if ok:
-                st.success(
-                    f"Candidate profile **{username_input}** committed successfully to PostgreSQL."
+                # Call our updated mailer function that returns a success flag and message payload
+                mail_sent, server_message = send_welcome_email(
+                    candidate_email=email_input,
+                    full_name=full_name_input,
+                    username=username_input,
+                    password_plain=password_input,
                 )
 
-                # ── AUTOMATED EMAIL DISPATCH TRIGGER ──────────────────────
-                with st.spinner(
-                    "📧 Syncing secure message dispatch with SMTP relays..."
-                ):
-                    from backend.utils.mailer import send_welcome_email
+            if mail_sent:
+                # ONLY if the email domain is verified and delivered, write to PostgreSQL
+                ok = create_candidate(
+                    username_input,
+                    password_input,
+                    full_name_input,
+                    email_input,
+                    "admin",
+                )
 
-                    mail_sent = send_welcome_email(
-                        candidate_email=email_input,
-                        full_name=full_name_input,
-                        username=username_input,
-                        password_plain=password_input,  # Sends plain text so they know their temporary login pass
-                    )
-
-                if mail_sent:
+                if ok:
+                    st.success(f"📩 {server_message}")
                     st.success(
-                        f"📩 Invitation credentials successfully routed to candidate inbox ({email_input})."
+                        f"Candidate profile **{username_input}** committed successfully to PostgreSQL."
                     )
+                    st.code(f"Username: {username_input}\nPassword: {password_input}")
                 else:
                     st.warning(
-                        "⚠️ Profile created, but SMTP relay dropped email delivery. Check terminal logs."
+                        f"Email sent, but Username '{username_input}' already exists in candidates base database."
                     )
-                # ──────────────────────────────────────────────────────────────
-
-                st.code(f"Username: {username_input}\nPassword: {password_input}")
             else:
-                st.warning(
-                    f"Username '{username_input}' already exists in candidates base database."
-                )
+                # If mail_sent is False, prevent database insertion entirely and show why
+                st.error(f"❌ **Registration Denied:** {server_message}")

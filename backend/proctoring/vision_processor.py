@@ -53,7 +53,7 @@ detector = LegacyDetectorBridge()
 
 
 def process_proctoring_frame(
-    image_bytes: bytes, phone_conf_threshold: float = 0.28
+    image_bytes: bytes, phone_conf_threshold: float = 0.55
 ) -> dict:
     """
     Evaluates an incoming image frame stream byte array.
@@ -86,10 +86,10 @@ def process_proctoring_frame(
 
     general_results = general_model.predict(
         frame,
-        conf=phone_conf_threshold,
+        conf=0.55,
         classes=[67],  # Only care about cell phones
         imgsz=640,  # Keeps latency fast on CPU bounds
-        augment=True,  # Tests flipped and multi-scaled copies internally for close-ups
+        augment=False,  # Tests flipped and multi-scaled copies internally for close-ups
         verbose=False,
     )
 
@@ -98,7 +98,7 @@ def process_proctoring_frame(
             class_id = int(box.cls[0].item())
             confidence = float(box.conf[0].item())
 
-            if class_id == 67 and confidence >= phone_conf_threshold:
+            if class_id == 67 and confidence >= 0.55:
                 phone_detected = True
                 logger.warning(
                     f"[Proctor Upgrade] Phone detected with upgraded weights. Conf: {confidence:.2f}"

@@ -22,7 +22,9 @@ def init_db():
         email           VARCHAR(255),
         created_by      VARCHAR(100),
         created_at      TIMESTAMP DEFAULT NOW(),
-        interview_done  BOOLEAN DEFAULT FALSE
+        interview_done  BOOLEAN DEFAULT FALSE,
+        is_expired      BOOLEAN DEFAULT FALSE,
+        credential_expires_at TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS interview_sessions (
@@ -74,11 +76,21 @@ def init_db():
         fullscreen_warnings INTEGER DEFAULT 0,
         tab_warnings        INTEGER DEFAULT 0,
         face_warnings       INTEGER DEFAULT 0,
+        pose_warnings       INTEGER DEFAULT 0,
+        phone_warnings      INTEGER DEFAULT 0,
         locked              BOOLEAN DEFAULT FALSE,
         lock_reason         TEXT,
         full_log            JSONB,
         created_at          TIMESTAMP DEFAULT NOW()
     );
+
+    ALTER TABLE candidates
+        ADD COLUMN IF NOT EXISTS is_expired BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS credential_expires_at TIMESTAMP;
+
+    ALTER TABLE proctoring_flags
+        ADD COLUMN IF NOT EXISTS pose_warnings INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS phone_warnings INTEGER DEFAULT 0;
     """
     with get_conn() as conn:
         with conn.cursor() as cur:

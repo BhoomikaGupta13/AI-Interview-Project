@@ -1,45 +1,171 @@
 # backend/utils/mailer.py
 
 import os
+import dns.resolver
 import smtplib
+import socket
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
+from email_validator import validate_email, EmailNotValidError
 
 load_dotenv()
 
 
+def _smtp_mailbox_probe(
+    email: str, from_address: str = "probe@check.local"
+) -> tuple[bool, str]:
+    """
+    Stage 3: SMTP RCPT probe — connects directly to the recipient domain's
+    mail server and asks "does this mailbox exist?" without sending any mail.
+
+    How it works:
+      1. Look up the domain's MX record to find its mail server hostname.
+      2. Open a raw SMTP connection to port 25 on that server.
+      3. Send EHLO -> MAIL FROM -> RCPT TO and read the response code.
+         - 250 / 251  -> mailbox confirmed to exist
+         - 550 / 551 / 553 -> mailbox does not exist
+         - Anything else (421, 450, 452, connection refused, timeout) ->
+           the server is greylisting or blocking probes; we return
+           (True, "") so we don't false-block real addresses.
+
+    IMPORTANT CAVEATS:
+      - Gmail, Outlook, Yahoo and most large providers return 250 for ALL
+        addresses regardless (catch-all / anti-harvest policy). This probe
+        is most effective against smaller / corporate mail servers.
+      - A timeout or refused connection is treated as "unknown, allow through"
+        to avoid false positives on legitimate addresses.
+
+    Returns: (is_valid: bool, reason: str)
+      is_valid=True  + reason=""    -> exists or indeterminate (allow)
+      is_valid=False + reason="..." -> server explicitly rejected the mailbox
+    """
+    domain = email.split("@")[1]
+
+    # 1. Resolve MX record
+    try:
+        mx_records = sorted(
+            dns.resolver.resolve(domain, "MX"), key=lambda r: r.preference
+        )
+        mx_host = str(mx_records[0].exchange).rstrip(".")
+    except Exception:
+        # Can't resolve MX — already caught in Stage 2; allow through here
+        return True, ""
+
+    # 2. Open raw SMTP connection to port 25
+    try:
+        with smtplib.SMTP(timeout=10) as smtp:
+            smtp.connect(mx_host, 25)
+            smtp.ehlo_or_helo_if_needed()
+            smtp.mail(from_address)
+            code, _ = smtp.rcpt(email)
+
+            if code in (250, 251):
+                return True, ""  # Mailbox confirmed
+            elif code in (550, 551, 552, 553, 554):
+                return False, (
+                    f"The email address '{email}' does not exist or is not "
+                    "accepting mail. Please provide a valid, active inbox."
+                )
+            else:
+                # Greylisted / rate-limited / catch-all — don't block
+                return True, ""
+    except (
+        smtplib.SMTPConnectError,
+        smtplib.SMTPServerDisconnected,
+        socket.timeout,
+        OSError,
+    ):
+        # Server refused our probe connection — treat as indeterminate, allow
+        return True, ""
+
+
+def validate_candidate_email(email: str) -> tuple[bool, str]:
+    """
+    Three-stage email validation pipeline:
+
+      Stage 1 - Syntax  (no network)  : catches "user@", "plaintext", "a@b"
+      Stage 2 - DNS/MX  (DNS lookup)  : catches fake domains like notreal.xyz
+      Stage 3 - SMTP probe (port 25)  : catches non-existent mailboxes on
+                                        servers that respond honestly (most
+                                        corporate / smaller providers).
+                                        Large providers (Gmail/Outlook/Yahoo)
+                                        use catch-all policies, so a fake Gmail
+                                        address will still pass Stage 3 — this
+                                        is a known provider-side limitation and
+                                        cannot be worked around without a paid
+                                        verification API (ZeroBounce, NeverBounce).
+
+    Returns:
+      (True,  normalised_email)  -> address passed all stages, safe to send
+      (False, user_facing_error) -> address rejected, show this to the admin
+    """
+    clean = email.strip()
+
+    # Stage 1: Syntax only (fast, no network call)
+    try:
+        validate_email(clean, check_deliverability=False)
+    except EmailNotValidError:
+        return False, (
+            "The email address format is invalid. "
+            "Please enter a valid address like name@domain.com."
+        )
+
+    # Stage 2: DNS / MX record check
+    try:
+        email_info = validate_email(clean, check_deliverability=True)
+        normalised = email_info.normalized
+    except EmailNotValidError:
+        domain = clean.split("@")[-1] if "@" in clean else clean
+        return False, (
+            f"The email domain '{domain}' does not exist or cannot receive mail. "
+            "Please enter a real, active email address."
+        )
+
+    # Stage 3: SMTP RCPT probe (catches non-existent mailboxes where servers cooperate)
+    probe_ok, probe_error = _smtp_mailbox_probe(normalised)
+    if not probe_ok:
+        return False, probe_error
+
+    return True, normalised
+
+
 def send_welcome_email(
     candidate_email: str, full_name: str, username: str, password_plain: str
-) -> bool:
+) -> tuple[bool, str]:
     """
-    Dispatches a professional recruitment onboard invitation email to the candidate
-    containing system authentication credentials.
+    Validates email deliverability and dispatches account credentials.
+    Returns: (bool_success, string_status_message)
     """
-    # 1. Gather configuration metrics securely using your exact .env keys
+    # 1. Three-stage validation before attempting any SMTP work
+    is_valid, result = validate_candidate_email(candidate_email)
+    if not is_valid:
+        print(f"[Mailer] Validation blocked send: {result}")
+        return False, result
+
+    # result now holds the normalised email address
+    clean_email = result
+
+    # 2. Gather SMTP configuration from .env
     smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", 465))
-
-    # ── UPDATED TO MATCH YOUR EXPICIT .ENV NAMES ─────────────────────────────
-    smtp_user = os.getenv("GMAIL_SENDER")  # Changed from SMTP_USER
+    smtp_user = os.getenv("GMAIL_SENDER")
     smtp_password = os.getenv("GMAIL_APP_PASSWORD")
 
     if not smtp_user or not smtp_password:
-        print("[Mailer Error] Missing SMTP configuration flags in your .env file.")
-        return False
+        return False, "Missing SMTP configuration flags in your .env file."
 
-    # 2. Build Multi-part MIME Container layout
+    # 3. Build Multi-part MIME message
     msg = MIMEMultipart("alternative")
     msg["Subject"] = "🚀 Invitation: Automated AI Technical Interview Portal"
     msg["From"] = f"AI Recruitment Board <{smtp_user}>"
-    msg["To"] = candidate_email
+    msg["To"] = clean_email
 
-    # 3. Create clean professional HTML template message content
     html_content = f"""
     <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background-color: #1a1c23; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; color: #ffffff;">
-                <h2 style="margin: 0; color: #3182ce;">AI Technical Interview invitation</h2>
+                <h2 style="margin: 0; color: #3182ce;">AI Technical Interview Invitation</h2>
             </div>
             <div style="background-color: #f7fafc; padding: 20px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
                 <p>Hello <strong>{full_name}</strong>,</p>
@@ -62,31 +188,17 @@ def send_welcome_email(
                         </tr>
                     </table>
                 </div>
-
-                <h4 style="color: #2d3748; margin-bottom: 8px;">⚠️ Key Compliance Instructions:</h4>
-                <ul style="padding-left: 20px; margin-top: 0; color: #4a5568;">
-                    <li>Ensure your **Webcam** and **Microphone** devices are functional before starting.</li>
-                    <li>Please maintain a clear speaking voice; an on-screen **Live Input Audio Graph** will assist you.</li>
-                    <li>Do not leave the fullscreen window frame or swap browser tabs during the active testing window; doing so flags proctoring violations and will lock your session.</li>
-                </ul>
-                
                 <p style="margin-top: 25px;">Best of luck with your evaluation process!</p>
-                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-                <p style="font-size: 11px; color: #a0aec0; text-align: center; margin: 0;">This is an automated operational notification link message. Please do not reply directly.</p>
             </div>
         </body>
     </html>
     """
-
     msg.attach(MIMEText(html_content, "html"))
 
-    # 4. Initiate Secure SSL SMTP Handshake Connection execution
     try:
         with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
             server.login(smtp_user, smtp_password)
-            server.sendmail(smtp_user, candidate_email, msg.as_string())
-        print(f"[Mailer] Access dispatch successfully sent to {candidate_email}")
-        return True
+            server.sendmail(smtp_user, clean_email, msg.as_string())
+        return True, "Invitation credentials successfully routed to candidate inbox."
     except Exception as mail_error:
-        print(f"[Mailer Error] Secure communication dispatch failed: {mail_error}")
-        return False
+        return False, f"SMTP relay connection drop error: {str(mail_error)}"

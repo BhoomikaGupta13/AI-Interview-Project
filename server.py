@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse, Response
 import numpy as np
 import uvicorn
 from backend.proctoring.vision_processor import process_proctoring_frame, detector
-from backend.db.queries import save_proctoring, get_conn
+from backend.db.queries import save_proctoring, get_conn, update_session_status
 
 MAX_FACE_WARNINGS = 3
 MAX_PHONE_WARNINGS = 2
@@ -85,6 +85,12 @@ def _save_proctor(session: str, data: dict[str, Any]) -> None:
         json.dumps(data, indent=4),
         encoding="utf-8",
     )
+    if data.get("locked"):
+        try:
+            save_proctoring(session, data)
+            update_session_status(session, "TERMINATED")
+        except Exception:
+            logger.exception("Failed to persist terminated proctoring status")
 
 
 def _json(data: dict[str, Any], status_code: int = 200) -> JSONResponse:
@@ -139,11 +145,13 @@ async def detect_faces(
                     logger.warning(
                         f"[Proctor] Phone warning #{data['phone_warnings']} for session {session}"
                     )
-                    if data["phone_warnings"] >= MAX_PHONE_WARNINGS:
-                        data["locked"] = True
-                        data["lock_reason"] = (
-                            "Interview locked after unauthorized device (phone) detected."
-                        )
+                    data["flags"].append(
+                        {
+                            "timestamp": datetime.now().isoformat(),
+                            "event_type": "phone_detected",
+                            "details": {"warning_count": data["phone_warnings"]},
+                        }
+                    )
             else:
                 # Phone no longer in frame — reset state so next appearance counts again
                 data["phone_state"] = "ok"

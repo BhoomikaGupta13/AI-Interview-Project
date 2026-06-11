@@ -119,11 +119,38 @@ def get_all_candidates():
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
+                WITH latest_scores AS (
+                    SELECT DISTINCT ON (username)
+                           username, overall_score, band, created_at AS scored_at
+                    FROM scores
+                    ORDER BY username, created_at DESC
+                ),
+                latest_sessions AS (
+                    SELECT DISTINCT ON (username)
+                           username, status, completed_at, created_at
+                    FROM interview_sessions
+                    ORDER BY username,
+                             COALESCE(completed_at, started_at, created_at) DESC
+                )
                 SELECT c.username, c.full_name, c.email, c.created_at,
-                       c.interview_done,
-                       s.overall_score, s.band, s.created_at AS scored_at
+                       (
+                           COALESCE(c.interview_done, FALSE)
+                           OR EXISTS (
+                               SELECT 1
+                               FROM interview_sessions s
+                               WHERE s.username = c.username
+                                 AND (
+                                     s.status = 'COMPLETED'
+                                     OR s.completed_at IS NOT NULL
+                                 )
+                           )
+                       ) AS interview_done,
+                       COALESCE(ls.status, 'NOT_STARTED') AS interview_status,
+                       ls.completed_at,
+                       s.overall_score, s.band, s.scored_at
                 FROM candidates c
-                LEFT JOIN scores s ON s.username = c.username
+                LEFT JOIN latest_sessions ls ON ls.username = c.username
+                LEFT JOIN latest_scores s ON s.username = c.username
                 ORDER BY c.created_at DESC
             """)
             cols = [d[0] for d in cur.description]
@@ -276,6 +303,17 @@ def update_session_status(session_id, status, completed_at=None):
                 """,
                     (status, session_id),
                 )
+            if status == "COMPLETED":
+                cur.execute(
+                    """
+                    UPDATE candidates c
+                    SET interview_done=TRUE, is_expired=TRUE
+                    FROM interview_sessions s
+                    WHERE s.session_id=%s
+                      AND s.username = c.username
+                    """,
+                    (session_id,),
+                )
         conn.commit()
 
 
@@ -403,13 +441,15 @@ def save_proctoring(session_id, proctor: dict):
                 """
                 INSERT INTO proctoring_flags
                     (session_id, fullscreen_warnings, tab_warnings,
-                     face_warnings, pose_warnings, locked, lock_reason, full_log)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                     face_warnings, pose_warnings, phone_warnings, locked,
+                     lock_reason, full_log)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (session_id) DO UPDATE
                     SET fullscreen_warnings = EXCLUDED.fullscreen_warnings,
                         tab_warnings        = EXCLUDED.tab_warnings,
                         face_warnings       = EXCLUDED.face_warnings,
                         pose_warnings       = EXCLUDED.pose_warnings,
+                        phone_warnings      = EXCLUDED.phone_warnings,
                         locked              = EXCLUDED.locked,
                         lock_reason         = EXCLUDED.lock_reason,
                         full_log            = EXCLUDED.full_log
@@ -420,6 +460,7 @@ def save_proctoring(session_id, proctor: dict):
                     proctor.get("tab_warnings", 0),
                     proctor.get("face_warnings", 0),
                     proctor.get("pose_warnings", 0),
+                    proctor.get("phone_warnings", 0),
                     proctor.get("locked", False),
                     proctor.get("lock_reason", ""),
                     json.dumps(proctor),

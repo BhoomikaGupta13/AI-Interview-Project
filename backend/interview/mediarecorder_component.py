@@ -593,13 +593,13 @@ def media_recorder_component(
 
                   // ── Phone detection (evaluated every frame, no debounce needed) ──
                   if (j.phone_detected) {{
-                      proctor("⚠ Unauthorized device detected!", "#7f1d1d");
+                      proctor("⚠ Unauthorized device detected! (flags: " + (j.proctor.phone_warnings || 1) + ")", "#92400e");
                   }}
 
                   // ── Update full proctor display if server returned snapshot ──
                   if (j.proctor) {{
                       updateProctorDisplay(j.proctor);
-                      if (j.proctor.locked) {{
+                      if (j.proctor.locked && !j.phone_detected) {{
                           stopRecording();
                           stopCamera();
                           hidePageGate();
