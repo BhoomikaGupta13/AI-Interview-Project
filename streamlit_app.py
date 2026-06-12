@@ -272,10 +272,11 @@ if resume:
                 ANSWER_TIME = 90
 
                 if phase == "READ":
-                    st_autorefresh(interval=1000, key="read_timer")
                     remaining = max(0, READ_TIME - elapsed)
                     st.warning(f"Read Time: {remaining}s")
                     st.info("Read carefully")
+                    if remaining > 0:
+                        st_autorefresh(interval=1000, key=f"read_timer_tick_q{index}")
                     if remaining <= 0:
                         st.session_state["phase"] = "ANSWER"
                         st.session_state["phase_start"] = time.time()
