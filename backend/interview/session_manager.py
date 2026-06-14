@@ -19,7 +19,9 @@ def create_session(
 
     candidate_profile,
 
-    questions
+    questions,
+
+    username=None
 ):
 
     session_id = str(
@@ -67,7 +69,11 @@ def create_session(
 
         "candidate":
 
-        candidate_profile
+        candidate_profile,
+
+        "username":
+
+        username
 
     }
 

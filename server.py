@@ -24,6 +24,7 @@ import numpy as np
 import uvicorn
 from backend.proctoring.vision_processor import process_proctoring_frame, detector
 from backend.db.queries import save_proctoring, get_conn, update_session_status
+from backend.interview.post_interview import start_post_interview_processing
 
 MAX_FACE_WARNINGS = 3
 MAX_PHONE_WARNINGS = 2
@@ -207,6 +208,46 @@ async def proctor_status(session: str = ""):
     if not _valid_session(session):
         return _json({"status": "failed", "message": "invalid session"}, 400)
     return {"status": "success", "proctor": _load_proctor(session)}
+
+
+@app.options("/finalize_interview")
+async def finalize_interview_options():
+    return Response(status_code=200)
+
+
+@app.post("/finalize_interview")
+async def finalize_interview(request: Request):
+    payload = await request.json()
+    session = str(payload.get("session") or "").strip()
+    requested_status = str(payload.get("status") or "").upper()
+
+    if not _valid_session(session):
+        return _json({"status": "failed", "message": "invalid session"}, 400)
+
+    proctor = _load_proctor(session)
+    final_status = (
+        "TERMINATED"
+        if proctor.get("locked") or requested_status == "TERMINATED"
+        else "COMPLETED"
+    )
+
+    try:
+        save_proctoring(session, proctor)
+        update_session_status(
+            session,
+            final_status,
+            datetime.now().isoformat() if final_status == "COMPLETED" else None,
+        )
+        queued = start_post_interview_processing(session)
+    except Exception as exc:
+        logger.exception("Failed to finalize interview %s", session)
+        return _json({"status": "error", "message": str(exc)}, 500)
+
+    return {
+        "status": "success",
+        "interview_status": final_status,
+        "processing_queued": queued,
+    }
 
 
 @app.options("/proctor_event")

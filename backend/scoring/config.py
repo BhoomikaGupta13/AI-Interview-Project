@@ -1,7 +1,7 @@
 # backend/scoring/config.py
 
 SCORE_DIR = "storage/scores"
-TRANSCRIPT_BASE = "audio_test_outputs"
+TRANSCRIPT_BASE = "storage/transcripts"
 
 # ── BGE model (ADDED BACK TO FIX IMPORT ERROR) ─────────────────────────────
 EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"

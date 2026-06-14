@@ -19,7 +19,7 @@ from .combiner import get_band
 
 # ── DATABASE LAYER INTEGRATION ──────────────────────────────────────────────
 from backend.db.database import init_db, get_conn
-from backend.db.queries import save_score
+from backend.db.queries import save_score, save_session
 
 
 def _fetch_true_username(session_id: str) -> str:
@@ -189,7 +189,7 @@ class ScoringPipeline:
         profile: dict,
         q_type: str = "general",
     ) -> dict:
-        print(f"\n[Scoring] Q{question_no} ({q_type}): {question[:15]}…")
+        print(f"\n[Scoring] Q{question_no} ({q_type}): {question[:15]}...")
         try:
             echo_cleaned = _clean_echoed_question(question, answer)
             processed_answer = _sanitize_transcription(question, echo_cleaned)
@@ -246,7 +246,7 @@ class ScoringPipeline:
             final = round(final_raw * 10, 2)
             band = get_band(final)
             print(
-                f"  [Weights: Sim={weights['similarity']}, LLM={weights['llm']}, Depth={weights['depth']}] → final={final} ({band})"
+                f"  [Weights: Sim={weights['similarity']}, LLM={weights['llm']}, Depth={weights['depth']}] -> final={final} ({band})"
             )
 
             return {
@@ -282,13 +282,21 @@ class ScoringPipeline:
             }
 
     def score_session(self, session_id: str) -> dict:
+        os.makedirs(SCORE_DIR, exist_ok=True)
         answers_list = self._load_answers(session_id)
         session = self._load_session(session_id)
         profile = session["candidate"]
 
         # ── RESOLVED USERNAME PASSING ISSUE ───────────────────────────────────
-        username = _fetch_true_username(session_id)
+        username = session.get("username") or _fetch_true_username(session_id)
         print(f"[DB] Session owned by authentic user credentials: {username}")
+        if username != "unknown_candidate":
+            save_session(
+                session_id,
+                username,
+                session.get("status", "COMPLETED"),
+                session.get("expires_at"),
+            )
         # ──────────────────────────────────────────────────────────────────────
 
         results = []
@@ -344,9 +352,10 @@ class ScoringPipeline:
             )
         except Exception as db_err:
             print(f"[DB] Pipeline persistence error: {db_err}")
+            raise
         # ──────────────────────────────────────────────────────────────────────
 
-        print(f"\n[Scoring] Session {session_id} done → Overall: {overall}/10")
+        print(f"\n[Scoring] Session {session_id} done -> Overall: {overall}/10")
         return report
 
 

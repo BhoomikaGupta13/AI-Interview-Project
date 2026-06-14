@@ -90,6 +90,9 @@ def media_recorder_component(
       }}
 
       const R = window.__REC__[KEY];
+      if (!R.pendingUploads) R.pendingUploads = new Set();
+      if (!R.stopWaiters) R.stopWaiters = [];
+      if (typeof R.finalizing === "undefined") R.finalizing = false;
       const SESSION = "{session_id}";
       const QUESTION = "{question_no}";
       const SHOULD_RECORD = {should_record};
@@ -255,12 +258,7 @@ def media_recorder_component(
           if (j.status === "success") {{
             const p = j.proctor;
             updateProctorDisplay(p);
-        if (p.locked) {{
-              stopRecording();
-              stopCamera();
-              hidePageGate();
-              showOverlay(p.lock_reason || "Interview locked.", false);
-            }}
+            if (p.locked) await handleLocked(p);
           }}
         }} catch(err) {{
           console.error("[Proctor] event failed", err);
@@ -274,8 +272,7 @@ def media_recorder_component(
           if (j.status === "success") {{
             updateProctorDisplay(j.proctor);
             if (j.proctor.locked) {{
-              stopCamera();
-              showOverlay(j.proctor.lock_reason || "Interview locked.", false);
+              await handleLocked(j.proctor);
               return false;
             }}
           }}
@@ -371,6 +368,18 @@ def media_recorder_component(
         }}
       }}
 
+      function queueChunkUpload(blob, n) {{
+        const upload = uploadChunk(blob, n);
+        R.pendingUploads.add(upload);
+        upload.finally(() => R.pendingUploads.delete(upload));
+      }}
+
+      async function waitForPendingUploads() {{
+        while (R.pendingUploads.size > 0) {{
+          await Promise.allSettled(Array.from(R.pendingUploads));
+        }}
+      }}
+
       function updateCountdown(endAt) {{
         const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
         timerBar.textContent = "Answer Time Left: " + left + "s";
@@ -417,16 +426,19 @@ def media_recorder_component(
         R.recorder.ondataavailable = (e) => {{
           if (!e.data || e.data.size === 0) return;
           R.chunkNo += 1;
-          uploadChunk(e.data, R.chunkNo);
+          queueChunkUpload(e.data, R.chunkNo);
         }};
 
-        R.recorder.onstop = () => {{
+        R.recorder.onstop = async () => {{
           stopBtn.style.display = "none";
           clearInterval(R.countdownTimer);
           clearTimeout(R.stopTimer);
+          await waitForPendingUploads();
           timerBar.textContent = "Answer saved";
           timerBar.style.background = "#1f2937";
           status("Done. " + R.chunkNo + " chunks saved.", "rgba(0,80,0,0.85)");
+          const waiters = R.stopWaiters.splice(0);
+          waiters.forEach(resolve => resolve());
         }};
 
         R.recorder.start(1000);
@@ -443,6 +455,55 @@ def media_recorder_component(
           try {{ R.recorder.requestData(); }} catch(err) {{}}
           R.recorder.stop();
         }}
+      }}
+
+      async function stopRecordingAndWait() {{
+        if (!R.active) {{
+          await waitForPendingUploads();
+          return;
+        }}
+        await new Promise(resolve => {{
+          R.stopWaiters.push(resolve);
+          stopRecording();
+        }});
+      }}
+
+      async function handleLocked(proctorState) {{
+        if (R.finalizing) return;
+        R.finalizing = true;
+        const reason = proctorState.lock_reason || "Interview locked.";
+        hidePageGate();
+        showOverlay(reason + " Saving the final recording...", false);
+        status("Finalizing terminated interview...", "#991b1b");
+
+        try {{
+          await stopRecordingAndWait();
+          stopCamera();
+          const response = await fetch(API + "/finalize_interview", {{
+            method: "POST",
+            headers: {{ "Content-Type": "application/json" }},
+            body: JSON.stringify({{
+              session: SESSION,
+              status: "TERMINATED"
+            }})
+          }});
+          if (!response.ok) throw new Error("Finalize server returned " + response.status);
+          showOverlay(reason + " Recorded responses are now being processed.", false);
+        }} catch(err) {{
+          console.error("[Recorder] Finalization failed", err);
+          showOverlay(
+            reason + " Finalization will retry when the page refreshes.",
+            false
+          );
+        }}
+
+        setTimeout(() => {{
+          try {{
+            window.parent.location.reload();
+          }} catch(err) {{
+            window.location.reload();
+          }}
+        }}, 1200);
       }}
 
       async function enterFullscreenAndStart() {{
@@ -600,10 +661,7 @@ def media_recorder_component(
                   if (j.proctor) {{
                       updateProctorDisplay(j.proctor);
                       if (j.proctor.locked && !j.phone_detected) {{
-                          stopRecording();
-                          stopCamera();
-                          hidePageGate();
-                          showOverlay(j.proctor.lock_reason || "Interview locked.", false);
+                          await handleLocked(j.proctor);
                           R.faceDetectInFlight = false;
                           return;
                       }}

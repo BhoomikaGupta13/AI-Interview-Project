@@ -17,6 +17,7 @@ from backend.interview.session_manager import create_session
 from backend.interview.interview_engine import initialize_interview
 from backend.interview.question_manager import get_question
 from backend.interview.mediarecorder_component import media_recorder_component
+from backend.interview.post_interview import start_post_interview_processing
 from streamlit_autorefresh import st_autorefresh
 
 from backend.db.database import init_db
@@ -134,6 +135,67 @@ def voice_monitor_component(
     components.html(html_code, height=130)
 
 
+def question_speaker_component(session_id: str, question_no: int, question: str):
+    question_json = json.dumps(question)
+    speech_key = json.dumps(f"spoken_question_{session_id}_{question_no}")
+    html_code = f"""
+    <div style="display:flex;align-items:center;gap:10px;font-family:sans-serif;">
+        <button id="speakQuestion" type="button"
+            style="border:1px solid #64748b;border-radius:7px;padding:8px 13px;
+                   background:#f8fafc;color:#0f172a;font-weight:600;cursor:pointer;">
+            Speaker: Replay question
+        </button>
+        <span id="speechStatus" style="font-size:13px;color:#64748b;"></span>
+    </div>
+    <script>
+    (function() {{
+        const question = {question_json};
+        const speechKey = {speech_key};
+        const button = document.getElementById("speakQuestion");
+        const status = document.getElementById("speechStatus");
+        let speechWindow = window;
+        let storage = window.sessionStorage;
+
+        try {{
+            if (window.parent && window.parent.speechSynthesis) {{
+                speechWindow = window.parent;
+                storage = window.parent.sessionStorage;
+            }}
+        }} catch (err) {{
+            speechWindow = window;
+            storage = window.sessionStorage;
+        }}
+
+        function speakQuestion() {{
+            if (!("speechSynthesis" in speechWindow)) {{
+                status.textContent = "Text-to-speech is unavailable in this browser.";
+                button.disabled = true;
+                return;
+            }}
+
+            speechWindow.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(question);
+            utterance.lang = "en-US";
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            utterance.onstart = () => status.textContent = "Speaking...";
+            utterance.onend = () => status.textContent = "Finished";
+            utterance.onerror = () => status.textContent = "Unable to play speech.";
+            speechWindow.speechSynthesis.speak(utterance);
+        }}
+
+        button.addEventListener("click", speakQuestion);
+
+        if (!storage.getItem(speechKey)) {{
+            storage.setItem(speechKey, "1");
+            setTimeout(speakQuestion, 250);
+        }}
+    }})();
+    </script>
+    """
+    components.html(html_code, height=48)
+
+
 def load_proctor_status(session_id: str) -> dict:
     path = PROCTOR_DIR / f"{session_id}.json"
     if not path.exists():
@@ -185,7 +247,7 @@ if resume:
             blueprint = build_blueprint(profile)
             questions = generate_questions(profile, blueprint)
             final_questions = validate_questions(questions)
-            session = create_session(profile, final_questions)
+            session = create_session(profile, final_questions, username=username)
             st.session_state["interview_session"] = session
 
             # ── DB: save session + resume once on creation ────────────────────
@@ -247,8 +309,15 @@ if resume:
                 session["proctoring"] = proctor_status
                 persist_session(session)
                 update_session_status(session["session_id"], "TERMINATED")
+                save_proctoring(session["session_id"], proctor_status)
+                mark_interview_done(username)
+                start_post_interview_processing(session["session_id"])
                 st.error("Interview terminated.")
                 st.warning(session["termination_reason"])
+                st.info(
+                    "Recorded responses are being processed. Evaluation results "
+                    "are available only to the administrator."
+                )
                 st.stop()
 
             if question:
@@ -257,6 +326,12 @@ if resume:
                 st.info(question)
 
                 phase = st.session_state["phase"]
+                if phase == "READ":
+                    question_speaker_component(
+                        session["session_id"],
+                        index + 1,
+                        question,
+                    )
 
                 camera_placeholder = st.empty()
                 with camera_placeholder:
@@ -321,8 +396,14 @@ if resume:
                     st.session_state["interview_session"] = session
                     st.session_state["db_completed_saved"] = True
 
+                start_post_interview_processing(session["session_id"])
+
                 st.success("Interview completed. Thank you.")
-                st.info("You may now close this tab.")
+                st.info(
+                    "Your responses are being processed. Evaluation results are "
+                    "available only to the administrator."
+                )
+                st.stop()
 
                 st.divider()
                 sc = st.session_state.get("scoring_status", "idle")

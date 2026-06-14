@@ -7,10 +7,14 @@ import wave
 from pathlib import Path
 
 import ffmpeg
-import webrtcvad
 from faster_whisper import WhisperModel
 
 from .config import *
+
+try:
+    import webrtcvad
+except ImportError:
+    webrtcvad = None
 
 
 Path(AUDIO_FOLDER).mkdir(parents=True, exist_ok=True)
@@ -26,7 +30,7 @@ class InterviewPipeline:
             device=DEVICE,
             compute_type=COMPUTE_TYPE,
         )
-        self.vad = webrtcvad.Vad(2)
+        self.vad = webrtcvad.Vad(2) if webrtcvad is not None else None
 
         print("Model Loaded")
 
@@ -74,7 +78,13 @@ class InterviewPipeline:
 
         print("Validation Passed:", video_path)
 
-    def wait_for_recordings(self, folder: Path, stable_checks: int = 2, delay: float = 1.0):
+    def wait_for_recordings(
+        self,
+        folder: Path,
+        expected_count: int | None = None,
+        stable_checks: int = 2,
+        delay: float = 1.0,
+    ):
         """
         Wait briefly for the browser's final MediaRecorder chunk upload to finish.
         This avoids starting ffmpeg while q*.webm is still being appended.
@@ -86,7 +96,8 @@ class InterviewPipeline:
             files = sorted(folder.glob("q*.webm"))
             sizes = {file.name: file.stat().st_size for file in files}
 
-            if sizes and sizes == previous_sizes:
+            has_expected_files = expected_count is None or len(files) >= expected_count
+            if sizes and has_expected_files and sizes == previous_sizes:
                 stable_count += 1
                 if stable_count >= stable_checks:
                     return
@@ -165,6 +176,10 @@ class InterviewPipeline:
 
     def remove_silence(self, wav_path):
         wav_path = Path(wav_path)
+
+        if self.vad is None:
+            print("WebRTC VAD is unavailable; using original WAV")
+            return str(wav_path)
 
         with wave.open(str(wav_path), "rb") as wave_file:
             frames = wave_file.readframes(wave_file.getnframes())
@@ -305,28 +320,24 @@ class InterviewPipeline:
         """
         folder = Path(VIDEO_FOLDER) / session_id
         transcript_dir = self._session_transcript_dir(session_id)
+        session_path = Path("storage/sessions") / f"{session_id}.json"
 
-        if not folder.is_dir():
-            return [{
-                "question_no": 0,
-                "status": "error",
-                "error": f"Recording folder not found: {folder}",
-            }]
+        if not session_path.exists():
+            raise FileNotFoundError(f"Session file not found: {session_path}")
 
-        self.wait_for_recordings(folder)
+        session = json.loads(session_path.read_text(encoding="utf-8"))
+        questions = session.get("questions", [])
+        folder.mkdir(parents=True, exist_ok=True)
+        expected_count = (
+            len(questions) if session.get("status") == "COMPLETED" else None
+        )
+        self.wait_for_recordings(folder, expected_count=expected_count)
 
         def q_num(path: Path):
             match = re.fullmatch(r"q(\d+)\.webm", path.name, re.IGNORECASE)
             return int(match.group(1)) if match else 0
 
         webm_files = sorted(folder.glob("q*.webm"), key=q_num)
-
-        if not webm_files:
-            return [{
-                "question_no": 0,
-                "status": "error",
-                "error": f"No .webm recordings found in {folder}",
-            }]
 
         results = []
         proctoring = self._load_proctoring(session_id)
@@ -416,6 +427,23 @@ class InterviewPipeline:
         }
         manifest_path = transcript_dir / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=4), encoding="utf-8")
+
+        answers_by_question = {
+            item["question_no"]: item.get("full_text", "")
+            for item in results
+            if item.get("status") == "success"
+        }
+        combined_answers = [
+            {
+                "question": question,
+                "Answer": answers_by_question.get(question_no, ""),
+            }
+            for question_no, question in enumerate(questions, start=1)
+        ]
+        (transcript_dir / "combined_answers.json").write_text(
+            json.dumps(combined_answers, indent=4),
+            encoding="utf-8",
+        )
 
         ok = sum(1 for result in results if result["status"] == "success")
         print(f"\nSession {session_id} done: {ok}/{len(results)} transcribed.")
