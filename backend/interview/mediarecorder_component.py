@@ -8,6 +8,7 @@ def media_recorder_component(
     recording: bool,
     max_seconds: int | None = None,
     proctoring_active: bool = True,
+    api_base: str | None = None,
 ):
     q_key = f"{session_id}_q{question_no}"
     should_record = str(recording).lower()
@@ -84,7 +85,10 @@ def media_recorder_component(
         pendingFaceState:"ok",
         pendingFaceFrames:0,
         faceDetectInFlight:false,
-        faceEventInFlight:false
+        faceEventInFlight:false,
+        pendingUploads:new Set(),
+        stopWaiters:[],
+        finalizing:false
       
       }};
       }}
@@ -98,7 +102,17 @@ def media_recorder_component(
       const SHOULD_RECORD = {should_record};
       const SHOULD_PROCTOR = {should_proctor};
       const MAX_SECONDS = {seconds};
-      const API = "http://127.0.0.1:5001";
+      const API = (() => {{
+          try {{
+              return window.parent.location.origin + "/api";
+          }}
+          catch(err){{
+              return "/api";
+          }}
+    
+      }})();
+
+      console.log(API);
 
       let faceTimer=null;
       const preview = document.getElementById("preview");
@@ -258,7 +272,9 @@ def media_recorder_component(
           if (j.status === "success") {{
             const p = j.proctor;
             updateProctorDisplay(p);
-            if (p.locked) await handleLocked(p);
+        if (p.locked) {{
+              await handleLocked(p);
+            }}
           }}
         }} catch(err) {{
           console.error("[Proctor] event failed", err);
@@ -468,6 +484,19 @@ def media_recorder_component(
         }});
       }}
 
+      async function finalizeInterview(statusValue) {{
+        const response = await fetch(API + "/finalize_interview", {{
+          method: "POST",
+          headers: {{ "Content-Type": "application/json" }},
+          body: JSON.stringify({{
+            session: SESSION,
+            status: statusValue || "COMPLETED"
+          }})
+        }});
+        if (!response.ok) throw new Error("Finalize server returned " + response.status);
+        return await response.json();
+      }}
+
       async function handleLocked(proctorState) {{
         if (R.finalizing) return;
         R.finalizing = true;
@@ -479,15 +508,7 @@ def media_recorder_component(
         try {{
           await stopRecordingAndWait();
           stopCamera();
-          const response = await fetch(API + "/finalize_interview", {{
-            method: "POST",
-            headers: {{ "Content-Type": "application/json" }},
-            body: JSON.stringify({{
-              session: SESSION,
-              status: "TERMINATED"
-            }})
-          }});
-          if (!response.ok) throw new Error("Finalize server returned " + response.status);
+          await finalizeInterview("TERMINATED");
           showOverlay(reason + " Recorded responses are now being processed.", false);
         }} catch(err) {{
           console.error("[Recorder] Finalization failed", err);

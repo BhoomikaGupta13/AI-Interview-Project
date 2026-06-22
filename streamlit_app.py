@@ -17,7 +17,10 @@ from backend.interview.session_manager import create_session
 from backend.interview.interview_engine import initialize_interview
 from backend.interview.question_manager import get_question
 from backend.interview.mediarecorder_component import media_recorder_component
-from backend.interview.post_interview import start_post_interview_processing
+from backend.interview.post_interview import (
+    start_post_interview_processing,
+    get_post_interview_status,
+)
 from streamlit_autorefresh import st_autorefresh
 
 from backend.db.database import init_db
@@ -27,8 +30,6 @@ from backend.db.queries import (
     set_session_started,
     update_session_status,
     save_proctoring,
-    save_score,
-    save_questions_answers,
     mark_interview_done,
     mark_interview_started,
 )
@@ -211,6 +212,33 @@ def persist_session(session: dict):
     session_path.write_text(json.dumps(session, indent=4), encoding="utf-8")
 
 
+def show_post_interview_processing(session_id: str):
+    status = get_post_interview_status(session_id)
+    state = status.get("status", "queued")
+    labels = {
+        "queued": "Queued for transcription and scoring.",
+        "transcribing": "Transcribing recorded answers.",
+        "scoring": "Scoring transcribed answers.",
+        "completed": "Automatic transcription and scoring completed.",
+        "failed": "Automatic transcription/scoring failed.",
+    }
+
+    if state == "completed":
+        st.success(labels[state])
+        if status.get("overall_score") is not None:
+            st.caption(
+                f"Admin result: {status.get('overall_score')} / 10"
+                f" ({status.get('band', 'Unbanded')})"
+            )
+    elif state == "failed":
+        st.error(labels[state])
+        with st.expander("Processing error"):
+            st.code(status.get("error", "No error details were written."))
+    else:
+        st.info(labels.get(state, "Processing recorded responses."))
+        st_autorefresh(interval=5000, key=f"post_interview_status_{session_id}")
+
+
 # ── Session state defaults ────────────────────────────────────────────────────
 DEFAULTS = {
     "interview_session": None,
@@ -318,6 +346,7 @@ if resume:
                     "Recorded responses are being processed. Evaluation results "
                     "are available only to the administrator."
                 )
+                show_post_interview_processing(session["session_id"])
                 st.stop()
 
             if question:
@@ -403,138 +432,7 @@ if resume:
                     "Your responses are being processed. Evaluation results are "
                     "available only to the administrator."
                 )
-                st.stop()
-
-                st.divider()
-                sc = st.session_state.get("scoring_status", "idle")
-
-                if sc == "idle":
-                    st.info(
-                        "Transcription must be done first using the terminal command "
-                        "before scoring. Once done, click the button below."
-                    )
-                    if st.button("📊 Analyse & Score Answers"):
-                        st.session_state["scoring_status"] = "running"
-                        st.rerun()
-
-                elif sc == "running":
-                    session_id = st.session_state["interview_session"]["session_id"]
-                    st.info(
-                        "⏳ Scoring in progress — generating key concepts, "
-                        "running LLM evaluator and depth judge per question. "
-                        "This takes 1–3 minutes. Do not close this tab."
-                    )
-                    with st.spinner("Scoring answers…"):
-                        try:
-                            from backend.scoring import ScoringPipeline
-
-                            report = ScoringPipeline().score_session(session_id)
-                            st.session_state["scoring_results"] = report
-                            st.session_state["scoring_status"] = "done"
-
-                            # ── DB: save scores + Q&A ─────────────────────────
-                            save_score(session_id, username, report)
-                            save_questions_answers(
-                                session_id, report.get("results", [])
-                            )
-
-                        except FileNotFoundError as fnf:
-                            st.session_state["scoring_error"] = str(fnf)
-                            st.session_state["scoring_status"] = "error"
-                        except Exception:
-                            import traceback
-
-                            st.session_state["scoring_error"] = traceback.format_exc()
-                            st.session_state["scoring_status"] = "error"
-                    st.rerun()
-
-                elif sc == "error":
-                    err = st.session_state.get("scoring_error", "")
-                    if "No transcript found" in err:
-                        st.warning(err)
-                    else:
-                        st.error("Scoring pipeline failed:")
-                        st.code(err)
-                    if st.button("🔄 Retry scoring"):
-                        st.session_state["scoring_status"] = "idle"
-                        st.rerun()
-
-                elif sc == "done":
-                    report = st.session_state["scoring_results"]
-                    overall = report["overall_score"]
-                    band = report["band"]
-
-                    BAND_COLOR = {
-                        "Strong": "green",
-                        "Good": "blue",
-                        "Average": "orange",
-                        "Weak": "red",
-                    }
-                    color = BAND_COLOR.get(band, "gray")
-                    st.markdown(
-                        f"## Overall Score: **{overall} / 10** — :{color}[{band}]"
-                    )
-
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("Questions", report["total_questions"])
-                    c2.metric("Scored OK", report["scored"])
-                    c3.metric("Band", band)
-
-                    st.subheader("📋 Per-question breakdown")
-                    for r in report["results"]:
-                        q_no = r["question_no"]
-                        score = r.get("score", 0)
-                        band_q = r.get("band", "")
-                        icon = "✅" if r.get("status") == "success" else "❌"
-                        with st.expander(
-                            f"{icon}  Q{q_no} — {score}/10  ({band_q})", expanded=False
-                        ):
-                            if r.get("status") == "success":
-                                st.markdown(f"**Question:** {r['question']}")
-                                st.markdown(
-                                    f"**Candidate's answer:** {r['answer'] or '_No answer recorded_'}"
-                                )
-                                st.divider()
-                                s1, s2, s3 = st.columns(3)
-                                s1.metric(
-                                    "Concept similarity",
-                                    f"{r.get('similarity',0)}/10",
-                                    help="BGE-large semantic concept coverage",
-                                )
-                                s2.metric(
-                                    "Communication",
-                                    f"{r.get('llm_score',0)}/10",
-                                    help="Clarity + correctness + completeness",
-                                )
-                                s3.metric(
-                                    "Technical depth",
-                                    f"{r.get('depth_score',0)}/10",
-                                    help="Architecture, challenges, outcomes",
-                                )
-                                d1, d2, d3 = st.columns(3)
-                                d1.metric("Clarity", r.get("clarity", 0))
-                                d2.metric("Correctness", r.get("correctness", 0))
-                                d3.metric("Completeness", r.get("completeness", 0))
-                                if r.get("feedback"):
-                                    st.markdown(f"**📝 Feedback:** {r['feedback']}")
-                                if r.get("strengths"):
-                                    st.markdown(
-                                        "**✅ Strengths:** "
-                                        + "  ·  ".join(r["strengths"])
-                                    )
-                                if r.get("improvements"):
-                                    st.markdown(
-                                        "**⚠️ To improve:** "
-                                        + "  ·  ".join(r["improvements"])
-                                    )
-                                if r.get("depth_feedback"):
-                                    st.markdown(
-                                        f"**🔍 Depth critique:** {r['depth_feedback']}"
-                                    )
-                            else:
-                                st.error("Scoring failed for this question.")
-                                with st.expander("Error detail"):
-                                    st.code(r.get("error", ""))
+                show_post_interview_processing(session["session_id"])
 
     except Exception as exc:
         st.error(str(exc))

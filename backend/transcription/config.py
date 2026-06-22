@@ -31,6 +31,7 @@ ENHANCED_AUDIO_FILTER = (
     "dynaudnorm=f=150:g=15,"
     "loudnorm=I=-18:TP=-1.5:LRA=11"
 )
+ENHANCEMENT_TIMEOUT_SECONDS = 120
 
 # Keep the full extracted audio for Whisper. WebRTC VAD can over-trim interview
 # answers and produce empty/too-short files, so silence removal is optional.

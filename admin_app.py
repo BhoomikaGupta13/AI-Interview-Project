@@ -238,10 +238,13 @@ with tab1:
                         raw_sim = r.get("similarity", 0.0)
                         raw_llm = r.get("llm_score", 0.0)
                         raw_depth = r.get("depth_score", 0.0)
+                        answer_words = len(str(r.get("answer", "")).split())
 
                         sim_score = raw_sim if raw_sim > 1.0 else raw_sim * 10
                         llm_score = raw_llm if raw_llm > 1.0 else raw_llm * 10
                         depth_score = raw_depth if raw_depth > 1.0 else raw_depth * 10
+                        if answer_words < 4 and llm_score == 0 and depth_score == 0:
+                            sim_score = 0.0
 
                         matrix_data.append(
                             {

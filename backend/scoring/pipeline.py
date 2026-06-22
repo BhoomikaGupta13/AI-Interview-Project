@@ -209,7 +209,7 @@ class ScoringPipeline:
                     "status": "success",
                     "score": 1.0,
                     "band": "Weak",
-                    "similarity": 1.0,
+                    "similarity": 0.0,
                     "llm_score": 0.0,
                     "depth_score": 0.0,
                     "clarity": 1,

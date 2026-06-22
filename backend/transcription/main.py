@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import subprocess
 import time
 import traceback
 import wave
@@ -143,7 +144,7 @@ class InterviewPipeline:
         enhanced_path = wav_path.with_name(f"{wav_path.stem}_enhanced.wav")
 
         try:
-            (
+            process = (
                 ffmpeg
                 .input(str(wav_path))
                 .output(
@@ -154,8 +155,22 @@ class InterviewPipeline:
                     af=ENHANCED_AUDIO_FILTER,
                 )
                 .overwrite_output()
-                .run(quiet=True)
+                .run_async(pipe_stdout=True, pipe_stderr=True)
             )
+            _, stderr = process.communicate(timeout=ENHANCEMENT_TIMEOUT_SECONDS)
+            if process.returncode != 0:
+                stderr_text = stderr.decode("utf-8", errors="ignore") if stderr else ""
+                print(f"Audio enhancement failed; using raw WAV.\n{stderr_text}")
+                return str(wav_path)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            _, stderr = process.communicate()
+            stderr_text = stderr.decode("utf-8", errors="ignore") if stderr else ""
+            print(
+                "Audio enhancement timed out after "
+                f"{ENHANCEMENT_TIMEOUT_SECONDS}s; using raw WAV.\n{stderr_text}"
+            )
+            return str(wav_path)
         except ffmpeg.Error as exc:
             stderr = exc.stderr.decode("utf-8", errors="ignore") if exc.stderr else str(exc)
             print(f"Audio enhancement failed; using raw WAV.\n{stderr}")
@@ -338,6 +353,15 @@ class InterviewPipeline:
             return int(match.group(1)) if match else 0
 
         webm_files = sorted(folder.glob("q*.webm"), key=q_num)
+        if not webm_files:
+            raise FileNotFoundError(
+                f"No recordings found in {folder}. Wait for uploads to finish and retry."
+            )
+        if expected_count is not None and len(webm_files) < expected_count:
+            raise FileNotFoundError(
+                f"Expected {expected_count} recordings in {folder}, "
+                f"but found {len(webm_files)}. Wait for uploads to finish and retry."
+            )
 
         results = []
         proctoring = self._load_proctoring(session_id)
@@ -428,17 +452,30 @@ class InterviewPipeline:
         manifest_path = transcript_dir / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=4), encoding="utf-8")
 
+        recorded_question_numbers = {
+            item["question_no"]
+            for item in results
+            if item.get("status") == "success"
+        }
         answers_by_question = {
             item["question_no"]: item.get("full_text", "")
             for item in results
             if item.get("status") == "success"
         }
+        if session.get("status") == "TERMINATED":
+            question_items = [
+                (question_no, question)
+                for question_no, question in enumerate(questions, start=1)
+                if question_no in recorded_question_numbers
+            ]
+        else:
+            question_items = list(enumerate(questions, start=1))
         combined_answers = [
             {
                 "question": question,
                 "Answer": answers_by_question.get(question_no, ""),
             }
-            for question_no, question in enumerate(questions, start=1)
+            for question_no, question in question_items
         ]
         (transcript_dir / "combined_answers.json").write_text(
             json.dumps(combined_answers, indent=4),
