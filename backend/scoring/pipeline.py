@@ -4,6 +4,7 @@ import os
 import json
 import traceback
 import re
+import difflib
 
 from .config import (
     SCORE_DIR,
@@ -43,6 +44,14 @@ def _save_individual_question_scores(session_id: str, results: list):
     """
     Saves expanded scoring metrics to the questions_answers table,
     making individual question scores cleanly visible for front-end access.
+
+    NOTE: `raw_answer`, `sanitize_used_llm`, and `sanitize_reason` (the
+    fidelity-guardrail audit trail added to each result) are NOT written to
+    this table — the current schema has no columns for them. They ARE
+    persisted in the full JSON report written by score_session() to
+    SCORE_DIR/<session_id>.json, so raw-vs-sanitized text stays auditable.
+    If you want that audit trail in Postgres too, add matching columns to
+    questions_answers and extend the INSERT below.
     """
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -74,30 +83,177 @@ def _save_individual_question_scores(session_id: str, results: list):
         conn.commit()
 
 
-def _sanitize_transcription(question: str, raw_answer: str) -> str:
+def _word_overlap_ratio(a: str, b: str) -> float:
+    """Fraction of A's words that also appear in B (order-insensitive, case-insensitive)."""
+    wa = re.findall(r"[a-z0-9']+", a.lower())
+    wb = set(re.findall(r"[a-z0-9']+", b.lower()))
+    if not wa:
+        return 1.0
+    matched = sum(1 for w in wa if w in wb)
+    return matched / len(wa)
+
+
+def _sequence_similarity(a: str, b: str) -> float:
+    """
+    Order-sensitive similarity (0-1) between the two word sequences, via
+    difflib's SequenceMatcher. Unlike _word_overlap_ratio, this also cares
+    about word ORDER and STRUCTURE, so it catches a rewrite that reuses a
+    lot of the same words but rearranges/pads them into new sentences —
+    something a pure "are these words present somewhere" check can miss.
+    This is the primary defense against hallucination now that corrections
+    are no longer gated to a fixed vocabulary whitelist.
+    """
+    wa = re.findall(r"[a-z0-9']+", a.lower())
+    wb = re.findall(r"[a-z0-9']+", b.lower())
+    if not wa and not wb:
+        return 1.0
+    return difflib.SequenceMatcher(None, wa, wb).ratio()
+
+
+def _validate_sanitization(raw_answer: str, sanitized: str) -> tuple:
+    """
+    Fidelity guardrail: makes sure the LLM 'cleanup' didn't rewrite, invent,
+    or append content instead of just correcting transcription glitches.
+
+    Returns (is_valid, reason).
+    """
+    raw_words = raw_answer.split()
+    san_words = sanitized.split()
+
+    if not sanitized.strip():
+        return False, "empty_output"
+
+    # The sanitized answer should never be drastically longer than the raw
+    # transcript — real STT cleanup shrinks or holds length, it doesn't
+    # add new sentences of content.
+    length_ratio = len(san_words) / max(len(raw_words), 1)
+    if length_ratio > 1.35:
+        return False, f"length_expanded_{length_ratio:.2f}x"
+    if length_ratio < 0.5:
+        return False, f"length_collapsed_{length_ratio:.2f}x"
+
+    # Most of the raw transcript's vocabulary should still be present.
+    overlap = _word_overlap_ratio(raw_answer, sanitized)
+    if overlap < 0.55:
+        return False, f"low_word_overlap_{overlap:.2f}"
+
+    # Order-sensitive check: a handful of word-level substitutions/deletions
+    # keeps this ratio high; a rewrite or appended content drags it down
+    # even when overlap looks okay (e.g. same words, shuffled + padded).
+    seq_sim = _sequence_similarity(raw_answer, sanitized)
+    if seq_sim < 0.70:
+        return False, f"low_sequence_similarity_{seq_sim:.2f}"
+
+    return True, "ok"
+
+
+def _known_vocabulary(profile: dict) -> str:
+    """
+    Builds a short list of terms the candidate is known to use (from their
+    own profile), offered to the sanitizer as SUPPORTING context — not a
+    hard whitelist. Profiles are rarely exhaustive, so gating corrections
+    only on this list would leave real (but undeclared) terms uncorrected.
+    """
+    skills = profile.get("skills", [])[:15]
+    raw_projects = profile.get("projects", [])[:6]
+    project_names = [
+        p.get("name", "") if isinstance(p, dict) else str(p) for p in raw_projects
+    ]
+    terms = [t for t in (skills + project_names) if t]
+    return ", ".join(terms) if terms else "(none on file)"
+
+
+def _sanitize_transcription(question: str, raw_answer: str, profile: dict) -> dict:
     """
     Uses a lightweight LLM call to correct Speech-to-Text acoustic glitches,
     phonetic typos, and repeated phrase loops before evaluation.
+
+    Corrections are grounded in whatever context is actually available —
+    the interview question's own wording, the surrounding sentences, and
+    (as a supporting hint, not a requirement) the candidate's declared
+    skills/projects. Nothing is required to be pre-declared to get fixed;
+    the real safety net is the guardrail below, which checks the LLM's
+    output against the raw transcript for both word overlap AND word-order
+    similarity, and falls back to the raw transcript if it looks like a
+    rewrite rather than a handful of word-level fixes.
+
+    Returns a dict: {"text": <answer used for scoring>, "raw": raw_answer,
+                      "sanitized": <what the LLM returned, or None>,
+                      "used_sanitized": bool, "reason": str}
     """
     if not raw_answer.strip() or len(raw_answer.split()) < 4:
-        return raw_answer
+        return {
+            "text": raw_answer,
+            "raw": raw_answer,
+            "sanitized": None,
+            "used_sanitized": False,
+            "reason": "too_short_to_sanitize",
+        }
 
     from backend.utils.llm_client import ask_llm
 
-    prompt = f"""You are an advanced Audio Transcription Post-Processor for a technical interview system.
-The candidate's answer was transcribed from audio and contains phonetic glitches, repeated sentence loops, and acoustic errors.
+    known_terms = _known_vocabulary(profile)
+
+    prompt = f"""You are a strict word-level transcription corrector for a technical interview system.
+The candidate's answer was transcribed from audio via Speech-to-Text and may contain acoustic
+mis-hearings (wrong word substituted for a similar-sounding one) and broken repeated-phrase loops
+caused by audio glitches.
 
 Context Question: {question}
-Glitched Raw Transcript: "{raw_answer}"
+Raw Transcript: "{raw_answer}"
 
-Tasks:
-1. Fix words that sound phonetically similar to technical terms but were transcribed wrong (e.g., 'scabal' -> 'scalable', 'stole' -> 'stored', 'John Ray' -> 'genre', 'fleeing' -> 'frame', 'sea ghost' -> 'XGBoost').
-2. Remove broken, identical phrase loops caused by audio capture glitches (e.g. loops of 'I'm going to turn it to you now').
-3. Smooth out grammar, but keep the candidate's original intent, vocabulary choice, and exact level of detail. Do NOT add new technical concepts or make the answer smarter than it is.
+Candidate's declared skills/projects (supporting context only — this list is NOT exhaustive,
+so a real term the candidate used may be missing from it; don't refuse a correction just
+because the word isn't listed here):
+{known_terms}
 
-Return ONLY the clean, corrected transcript text. No preamble, no explanation.
+STRICT RULES — you are a correction pass, not a writer:
+1. Fix a word/short phrase ONLY when you are highly confident, from context, that it is a
+   phonetic mis-transcription of a specific word the candidate actually said. Strong evidence
+   for confidence includes: the correct term appears (or is clearly implied) in the Context
+   Question itself, the correct term appears elsewhere in the candidate's own transcript, or it
+   matches an entry in the declared skills/projects above. A close phonetic match plus contextual
+   fit (e.g. "whisper mode" immediately followed by talk of transcribing audio, in an answer to a
+   question about the Whisper model) is enough — you do NOT need the term to be pre-listed.
+2. If you cannot point to a specific reason for confidence, leave the word EXACTLY as
+   transcribed. Do not swap in a "better sounding" or "more impressive" technical term on a hunch.
+3. Remove only exact/near-exact duplicate phrase loops caused by audio capture glitches
+   (the same sentence or clause repeated back-to-back with no new content).
+4. Do NOT add sentences, explanations, examples, or technical detail that is not already present
+   in the raw transcript. Do NOT elaborate, summarize, or improve the answer.
+5. Do NOT change the candidate's vocabulary, sentence structure, or level of detail beyond fixing
+   clear glitches. The output word count and word order must stay close to the input.
+6. If the transcript looks fine as-is, return it unchanged.
+
+Return ONLY the corrected transcript text. No preamble, no explanation, no markdown.
 """
-    return ask_llm(prompt).strip()
+    try:
+        sanitized = ask_llm(prompt, temperature=0.0).strip()
+    except TypeError:
+        # ask_llm signature may not support a temperature kwarg.
+        sanitized = ask_llm(prompt).strip()
+
+    is_valid, reason = _validate_sanitization(raw_answer, sanitized)
+    if is_valid:
+        return {
+            "text": sanitized,
+            "raw": raw_answer,
+            "sanitized": sanitized,
+            "used_sanitized": True,
+            "reason": reason,
+        }
+
+    print(
+        f"  [Sanitize Guardrail] Rejected LLM cleanup ({reason}). "
+        f"Falling back to raw transcript."
+    )
+    return {
+        "text": raw_answer,
+        "raw": raw_answer,
+        "sanitized": sanitized,
+        "used_sanitized": False,
+        "reason": reason,
+    }
 
 
 def _clean_echoed_question(question: str, answer: str) -> str:
@@ -192,10 +348,41 @@ class ScoringPipeline:
         print(f"\n[Scoring] Q{question_no} ({q_type}): {question[:15]}...")
         try:
             echo_cleaned = _clean_echoed_question(question, answer)
-            processed_answer = _sanitize_transcription(question, echo_cleaned)
+            sanitize_result = _sanitize_transcription(question, echo_cleaned, profile)
+            processed_answer = sanitize_result["text"]
             print(f"  [Sanitized Text]: {processed_answer[:60]}...")
+            if not sanitize_result["used_sanitized"] and sanitize_result["sanitized"]:
+                print(
+                    f"  [Sanitize Audit] raw kept. LLM proposed: "
+                    f"{sanitize_result['sanitized'][:60]}..."
+                )
 
             word_count = len(processed_answer.split())
+
+            if word_count == 0:
+                print("  [Unanswered] Blank answer. Skipping model calls.")
+                return {
+                    "question_no": question_no,
+                    "question_type": q_type,
+                    "question": question,
+                    "answer": "",
+                    "raw_answer": answer,
+                    "sanitize_used_llm": False,
+                    "sanitize_reason": sanitize_result["reason"],
+                    "status": "success",
+                    "score": 0.0,
+                    "band": "Unanswered",
+                    "similarity": 0.0,
+                    "llm_score": 0.0,
+                    "depth_score": 0.0,
+                    "clarity": 0,
+                    "correctness": 0,
+                    "completeness": 0,
+                    "feedback": "Unanswered question.",
+                    "strengths": [],
+                    "improvements": ["Answer this question to receive a score."],
+                    "depth_feedback": "Unanswered question.",
+                }
 
             if word_count < 4:
                 print(
@@ -206,6 +393,9 @@ class ScoringPipeline:
                     "question_type": q_type,
                     "question": question,
                     "answer": answer,
+                    "raw_answer": answer,
+                    "sanitize_used_llm": sanitize_result["used_sanitized"],
+                    "sanitize_reason": sanitize_result["reason"],
                     "status": "success",
                     "score": 1.0,
                     "band": "Weak",
@@ -233,6 +423,13 @@ class ScoringPipeline:
             llm_score = llm_result["llm_score"]
             print(f"  calibrated_llm_score={llm_score:.3f}")
 
+            # ── CALIBRATED SOFT-FLOOR FILTER FOR PARTIALLY CORRECT MINIMUMS ──
+            if llm_result.get("correctness", 0) <= 2:
+                # If the similarity score was already low, give it a soft baseline credit
+                # instead of dropping it straight down to absolute zero.
+                similarity = max(0.15, similarity)
+            # ──────────────────────────────────────────────────────────────────
+
             judge_result = judge_depth(question, processed_answer, profile)
             depth_score = judge_result["depth_score"]
             print(f"  depth_score={depth_score:.3f}")
@@ -254,6 +451,9 @@ class ScoringPipeline:
                 "question_type": q_type,
                 "question": question,
                 "answer": processed_answer,
+                "raw_answer": answer,
+                "sanitize_used_llm": sanitize_result["used_sanitized"],
+                "sanitize_reason": sanitize_result["reason"],
                 "status": "success",
                 "score": final,
                 "band": band,

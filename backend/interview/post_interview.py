@@ -1,10 +1,12 @@
 import json
+import os
 import threading
+import time
 import traceback
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
-
 
 JOB_DIR = Path("storage/post_interview_jobs")
 JOB_DIR.mkdir(parents=True, exist_ok=True)
@@ -12,6 +14,16 @@ JOB_DIR.mkdir(parents=True, exist_ok=True)
 _executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="post-interview")
 _guard = threading.Lock()
 _active_sessions: set[str] = set()
+
+# Retry knobs for the atomic rename step. On Windows, os.replace() can raise
+# PermissionError (WinError 5) if something else — most commonly OneDrive's
+# sync engine, an antivirus scanner, or a search indexer — has a transient
+# handle open on the destination file. These locks normally clear within
+# milliseconds, so a short retry-with-backoff is enough; it is NOT a sign of
+# a logic race in this module (writes for a given session are already
+# strictly sequential — see _write_status callers).
+_REPLACE_MAX_ATTEMPTS = 6
+_REPLACE_BASE_DELAY_S = 0.05
 
 
 def _status_path(session_id: str) -> Path:
@@ -26,9 +38,30 @@ def _write_status(session_id: str, status: str, **details) -> None:
         **details,
     }
     path = _status_path(session_id)
-    temp_path = path.with_suffix(".tmp")
+    # Unique temp filename per write: cheap insurance against two writers
+    # ever targeting the same temp path, even though current call sites are
+    # already serialized per session.
+    temp_path = path.with_suffix(f".{os.getpid()}.{uuid.uuid4().hex[:8]}.tmp")
     temp_path.write_text(json.dumps(payload, indent=4), encoding="utf-8")
-    temp_path.replace(path)
+
+    last_err = None
+    for attempt in range(1, _REPLACE_MAX_ATTEMPTS + 1):
+        try:
+            temp_path.replace(path)
+            return
+        except PermissionError as e:
+            last_err = e
+            if attempt == _REPLACE_MAX_ATTEMPTS:
+                break
+            time.sleep(_REPLACE_BASE_DELAY_S * attempt)
+
+    # All retries exhausted — clean up the orphaned temp file so it doesn't
+    # pile up, then surface the real error.
+    try:
+        temp_path.unlink(missing_ok=True)
+    except OSError:
+        pass
+    raise last_err
 
 
 def _score_exists(session_id: str) -> bool:
@@ -68,7 +101,16 @@ def _run_post_interview(session_id: str) -> None:
         )
     except Exception:
         error = traceback.format_exc()
-        _write_status(session_id, "failed", error=error)
+        try:
+            _write_status(session_id, "failed", error=error)
+        except Exception:
+            # If even the failure write can't land (e.g. retries exhausted
+            # under sustained file-lock contention), don't let that mask
+            # the original error or crash silently inside the worker thread.
+            print(
+                f"[PostInterview] Session {session_id} ALSO failed to write "
+                f"'failed' status:\n{traceback.format_exc()}"
+            )
         print(f"[PostInterview] Session {session_id} failed:\n{error}")
     finally:
         with _guard:

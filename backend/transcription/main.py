@@ -452,30 +452,17 @@ class InterviewPipeline:
         manifest_path = transcript_dir / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=4), encoding="utf-8")
 
-        recorded_question_numbers = {
-            item["question_no"]
-            for item in results
-            if item.get("status") == "success"
-        }
         answers_by_question = {
             item["question_no"]: item.get("full_text", "")
             for item in results
             if item.get("status") == "success"
         }
-        if session.get("status") == "TERMINATED":
-            question_items = [
-                (question_no, question)
-                for question_no, question in enumerate(questions, start=1)
-                if question_no in recorded_question_numbers
-            ]
-        else:
-            question_items = list(enumerate(questions, start=1))
         combined_answers = [
             {
                 "question": question,
                 "Answer": answers_by_question.get(question_no, ""),
             }
-            for question_no, question in question_items
+            for question_no, question in enumerate(questions, start=1)
         ]
         (transcript_dir / "combined_answers.json").write_text(
             json.dumps(combined_answers, indent=4),
