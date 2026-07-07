@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 storage/
 audio_test_outputs/
+how_to_run.txt

@@ -13,6 +13,18 @@ from backend.db.queries import (
 )
 from backend.db.database import init_db, get_conn
 
+# ── UI theme (new) ────────────────────────────────────────────────────────────
+from backend.ui.theme import (
+    apply_theme,
+    render_theme_toggle,
+    render_sidebar_brand,
+    render_hero,
+    section_title,
+    card_open,
+    card_close,
+    chip,
+)
+
 init_db()
 
 
@@ -20,7 +32,6 @@ def _is_valid_email(email: str) -> bool:
     """
     Quick client-side syntax pre-check using the same library as the mailer,
     so the error surfaces immediately without a network call.
-    The mailer will then also run a live DNS/MX check before any SMTP attempt.
     """
     from email_validator import validate_email, EmailNotValidError
 
@@ -32,78 +43,124 @@ def _is_valid_email(email: str) -> bool:
 
 
 if __name__ != "__portal__":
-    st.set_page_config(page_title="Admin — AI Interview System", layout="wide")
-st.title("Admin panel")
+    st.set_page_config(
+        page_title="Admin — AI Interview System",
+        layout="wide",
+        page_icon="🛠️",
+        initial_sidebar_state="expanded",
+    )
 
+# ── Theme + top-bar toggle ────────────────────────────────────────────────────
+apply_theme("admin")
+render_sidebar_brand("admin")
+render_theme_toggle(key="theme_toggle_admin")
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
 require_admin_login()
 
-st.sidebar.success(f"Logged in as admin")
-if st.sidebar.button("Logout"):
+# ── Sidebar admin identity + logout ──────────────────────────────────────────
+st.sidebar.markdown("### Session")
+st.sidebar.markdown(
+    """<div class="ai-chip" style="width:100%; justify-content:center; padding:.5rem;">
+        <i class="fa-solid fa-user-shield" style="margin-right:.4rem;"></i>Logged in as admin</div>""",
+    unsafe_allow_html=True,
+)
+st.sidebar.write("")
+if st.sidebar.button("Log out", use_container_width=True):
     st.session_state["admin_logged_in"] = False
     st.rerun()
 
-tab1, tab2 = st.tabs(["Candidates", "Create candidate"])
+# ── Hero ──────────────────────────────────────────────────────────────────────
+render_hero(
+    eyebrow="Admin Console",
+    title="Interview Operations",
+    subtitle=(
+        "Review candidate performance, inspect proctoring signals, and manage credentials — "
+        "all in one calm, focused workspace."
+    ),
+    right_badge="Access: Administrator",
+    right_icon="fa-shield-halved",
+)
 
-# ── Tab 1: All candidates ─────────────────────────────────────────────────────
+tab1, tab2 = st.tabs(["📋 Candidates", "➕ Create candidate"])
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tab 1: All candidates
+# ─────────────────────────────────────────────────────────────────────────────
 with tab1:
-    st.subheader("All candidates")
+    section_title("All candidates", icon="fa-users")
     rows = get_all_candidates()
 
     if not rows:
-        st.info("No candidates yet.")
+        st.info("No candidates yet. Create the first one from the “Create candidate” tab.")
     else:
-        # ABSOLUTE FIX: Strip out the raw full_report string immediately so it CANNOT leak onto the screen
+        # Strip out raw full_report to prevent leakage
         cleaned_rows = []
         for r in rows:
             rc = r.copy()
             if "full_report" in rc:
-                del rc["full_report"]  # Delete the raw text dump completely
+                del rc["full_report"]
             cleaned_rows.append(rc)
 
+        # Roster header
+        card_open(icon="fa-table-list")
         header_cols = st.columns([2, 3, 3, 2, 2, 1])
-        header_cols[0].markdown("**Username**")
-        header_cols[1].markdown("**Name**")
-        header_cols[2].markdown("**Email**")
-        header_cols[3].markdown("**Interview**")
-        header_cols[4].markdown("**Score**")
-        header_cols[5].markdown("**Delete**")
+        for col, label in zip(header_cols, ["Username", "Name", "Email", "Interview", "Score", ""]):
+            col.markdown(
+                f"<div style='font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; "
+                f"color:var(--muted); font-weight:800;'>{label}</div>",
+                unsafe_allow_html=True,
+            )
 
         for r in cleaned_rows:
             username = r["username"]
-            full_name = r.get("full_name") or "-"
-            email = r.get("email") or "-"
+            full_name = r.get("full_name") or "—"
+            email = r.get("email") or "—"
             status = r.get("interview_status") or "NOT_STARTED"
-            done = (
-                "Completed"
-                if r.get("interview_done")
-                else status.replace("_", " ").title()
-            )
-            score = (
-                f"{r['overall_score']:.2f} / 10"
-                if r.get("overall_score") is not None
-                else "Not Scored"
-            )
-            if r.get("band"):
-                score = f"{score} ({r['band']})"
+
+            if r.get("interview_done"):
+                status_chip = chip("Completed", "")
+            elif status == "IN_PROGRESS":
+                status_chip = chip("In progress", "warn")
+            elif status == "TERMINATED":
+                status_chip = chip("Terminated", "danger")
+            else:
+                status_chip = chip("Not started", "muted")
+
+            if r.get("overall_score") is not None:
+                score_val = f"{r['overall_score']:.2f} / 10"
+                band = r.get("band")
+                band_kind = {
+                    "Strong": "",
+                    "Good": "",
+                    "Average": "warn",
+                    "Weak": "danger",
+                }.get(band, "muted")
+                score_html = f"<b style='font-family:Fraunces,serif;'>{score_val}</b>"
+                if band:
+                    score_html += " " + chip(band, band_kind)
+            else:
+                score_html = "<span style='color:var(--muted);'>Not scored</span>"
+
             pending_key = f"confirm_delete_{username}"
 
             row_cols = st.columns([2, 3, 3, 2, 2, 1])
             row_cols[0].markdown(f"**{username}**")
             row_cols[1].write(full_name)
             row_cols[2].write(email)
-            row_cols[3].write(done)
-            row_cols[4].write(score)
+            row_cols[3].markdown(status_chip, unsafe_allow_html=True)
+            row_cols[4].markdown(score_html, unsafe_allow_html=True)
             with row_cols[5]:
-                if st.button("Delete", key=f"delete_{username}"):
+                if st.button("🗑", key=f"delete_{username}", help="Delete candidate"):
                     st.session_state[pending_key] = True
 
             if st.session_state.get(pending_key):
                 st.warning(
-                    f"Confirm deletion of candidate credentials for '{username}'. "
+                    f"Confirm deletion of candidate credentials for **{username}**. "
                     "This cannot be undone."
                 )
-                confirm_col, cancel_col = st.columns([1, 5])
-                if confirm_col.button("Confirm", key=f"confirm_{username}"):
+                confirm_col, cancel_col, _ = st.columns([1, 1, 5])
+                if confirm_col.button("Confirm", key=f"confirm_{username}", type="primary"):
                     deleted = delete_candidate(username)
                     st.session_state.pop(pending_key, None)
                     if deleted.get("candidates"):
@@ -114,9 +171,10 @@ with tab1:
                 if cancel_col.button("Cancel", key=f"cancel_{username}"):
                     st.session_state.pop(pending_key, None)
                     st.rerun()
+        card_close()
 
         st.divider()
-        st.subheader("Per-candidate detail")
+        section_title("Per-candidate detail", icon="fa-magnifying-glass-chart")
         selected = st.selectbox(
             "Select candidate to view full report",
             options=[r["username"] for r in cleaned_rows],
@@ -142,28 +200,43 @@ with tab1:
 
                 if db_row:
                     session_id, report = db_row
-
-                    # Parse string to dict safely if it's stored as text
                     if isinstance(report, str):
                         report = json.loads(report)
 
-                    # 1. Top-Level Metrics Header
-                    st.markdown(f"### 📊 Performance Summary for `{selected}`")
-                    st.markdown(f"**Session Identifier:** `{session_id}`")
+                    band = report.get("band", "Weak")
+                    band_kind = {
+                        "Strong": "",
+                        "Good": "",
+                        "Average": "warn",
+                        "Weak": "danger",
+                    }.get(band, "muted")
 
+                    # 1. Performance summary card
+                    card_open(icon="fa-chart-line", title=f"Performance summary — {selected}")
                     st.markdown(
-                        f"#### **Overall Score:** {report.get('overall_score', 0.0)} / 10 — "
-                        f"**:{'green' if report.get('band')=='Strong' else 'blue' if report.get('band')=='Good' else 'orange' if report.get('band')=='Average' else 'red'}[{report.get('band', 'Weak')}]**"
+                        f"""<div style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                            <div>
+                                <div style="font-family:'Fraunces',serif; font-size:2.6rem; font-weight:600; color:var(--ink); line-height:1;">
+                                    {report.get('overall_score', 0.0)}<span style="color:var(--muted); font-size:1.3rem;"> / 10</span>
+                                </div>
+                                <div style="margin-top:.5rem;">{chip(band, band_kind)}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:.75rem; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; font-weight:700;">Session</div>
+                                <code style="background:var(--bg-soft); padding:.3rem .55rem; border-radius:8px; font-size:.82rem;">{session_id}</code>
+                            </div>
+                        </div>""",
+                        unsafe_allow_html=True,
                     )
+                    card_close()
 
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Total Questions", report.get("total_questions", 0))
-                    m2.metric("Successfully Scored", report.get("scored", 0))
-                    m3.metric("Candidate Band", report.get("band", "Weak"))
+                    m1.metric("Total questions", report.get("total_questions", 0))
+                    m2.metric("Successfully scored", report.get("scored", 0))
+                    m3.metric("Candidate band", band)
 
-                    # ── REAL-TIME PROCTORING MONITORING BLOCK ──
-                    st.divider()
-                    st.subheader("🛡️ Anti-Cheating & Proctoring Report")
+                    # 2. Proctoring
+                    section_title("Anti-cheating & proctoring", icon="fa-shield-halved")
 
                     with get_conn() as conn:
                         with conn.cursor() as cur:
@@ -198,22 +271,22 @@ with tab1:
 
                     p1, p2, p3, p4 = st.columns(4)
                     p1.metric(
-                        label="Fullscreen Breaks",
+                        label="Fullscreen breaks",
                         value=f"{proctor_data.get('fullscreen_warnings', 0)} / 2",
                     )
                     p2.metric(
-                        label="Tab Switches",
+                        label="Tab switches",
                         value=f"{proctor_data.get('tab_warnings', 0)} / 3",
                     )
                     p3.metric(
-                        label="Facial Anomalies",
+                        label="Facial anomalies",
                         value=f"{proctor_data.get('face_warnings', 0)} / 3",
                     )
                     p4.metric(
-                        label="Device Detections (Phones)",
+                        label="Phone detections",
                         value=f"{proctor_data.get('phone_warnings', 0)} / 2",
                         delta=(
-                            "Violation Logged"
+                            "Violation logged"
                             if proctor_data.get("phone_warnings", 0) > 0
                             else None
                         ),
@@ -222,16 +295,14 @@ with tab1:
 
                     if proctor_data.get("locked"):
                         st.error(
-                            f"🚨 **Session Terminated/Locked Out:** {proctor_data.get('lock_reason', 'Security breach threshold reached.')}"
+                            f"🚨 **Session terminated / locked:** "
+                            f"{proctor_data.get('lock_reason', 'Security breach threshold reached.')}"
                         )
                     else:
-                        st.success(
-                            "✅ Session context is clear. No terminal lock thresholds breached."
-                        )
+                        st.success("✅ Session context is clear. No terminal lock thresholds breached.")
 
-                    # 2. Per-Question Score Matrix Table Breakdown
-                    st.divider()
-                    st.subheader("📋 Per-Question Score Matrix")
+                    # 3. Per-Question Score Matrix
+                    section_title("Per-question score matrix", icon="fa-table-cells")
 
                     matrix_data = []
                     for r in report.get("results", []):
@@ -249,9 +320,7 @@ with tab1:
                         matrix_data.append(
                             {
                                 "Q#": r.get("question_no"),
-                                "Category": str(
-                                    r.get("question_type", "general")
-                                ).upper(),
+                                "Category": str(r.get("question_type", "general")).upper(),
                                 "Final Score": f"{r.get('score', 0.0)} / 10",
                                 "Band": r.get("band", "Weak"),
                                 "Similarity Overlap": f"{sim_score:.2f} / 10",
@@ -266,12 +335,11 @@ with tab1:
                         hide_index=True,
                     )
 
-                    # 3. Clean, Non-intrusive Report Download Link Button
-                    st.subheader("📥 Export Performance Data")
+                    # 4. Export
+                    section_title("Export performance data", icon="fa-download")
                     report_string = json.dumps(report, indent=4)
-
                     st.download_button(
-                        label="📄 Download Complete Technical Evaluation (JSON)",
+                        label="📄 Download complete technical evaluation (JSON)",
                         data=report_string,
                         file_name=f"Evaluation_Report_{selected}_{session_id}.json",
                         mime="application/json",
@@ -280,8 +348,8 @@ with tab1:
 
                     st.divider()
 
-                    # 4. Deep Expandable Feedback Breakdown
-                    st.subheader("🔍 Contextual Answer & Critique Logs")
+                    # 5. Contextual answers & critique
+                    section_title("Contextual answer & critique logs", icon="fa-list-check")
                     for r in report.get("results", []):
                         q_no = r["question_no"]
                         score = r.get("score", 0)
@@ -289,63 +357,75 @@ with tab1:
                         icon = "✅" if r.get("status") == "success" else "❌"
 
                         with st.expander(
-                            f"{icon} Question {q_no} — Finished with {score} / 10 ({band})"
+                            f"{icon} Question {q_no} — Scored {score} / 10 ({band})"
                         ):
-                            st.markdown(f"**Question Prompt:** *{r['question']}*")
                             st.markdown(
-                                f"**Clean Answer Text:** \"{r.get('answer','')}\""
+                                "<div style='color:var(--muted); font-size:.72rem; "
+                                "letter-spacing:.12em; text-transform:uppercase; font-weight:800;'>Prompt</div>",
+                                unsafe_allow_html=True,
                             )
+                            st.markdown(f"*{r['question']}*")
+
+                            st.markdown(
+                                "<div style='color:var(--muted); font-size:.72rem; margin-top:.6rem;"
+                                "letter-spacing:.12em; text-transform:uppercase; font-weight:800;'>Candidate answer</div>",
+                                unsafe_allow_html=True,
+                            )
+                            st.markdown(f'"{r.get("answer","")}"')
+
                             st.divider()
 
                             if r.get("feedback"):
-                                st.markdown(
-                                    f"**📝 Core Evaluator Feedback:** {r['feedback']}"
-                                )
+                                st.markdown(f"**📝 Core evaluator feedback:** {r['feedback']}")
                             if r.get("strengths"):
-                                st.markdown("**✅ Evaluated Strengths:**")
+                                st.markdown("**✅ Evaluated strengths:**")
                                 for s in r["strengths"]:
                                     st.markdown(f"- {s}")
                             if r.get("improvements"):
-                                st.markdown("**⚠️ Areas for Improvement:**")
+                                st.markdown("**⚠️ Areas for improvement:**")
                                 for imp in r["improvements"]:
                                     st.markdown(f"- {imp}")
                             if r.get("depth_feedback"):
-                                st.markdown(
-                                    f"**🔍 Senior Judge Depth Critique:** {r['depth_feedback']}"
-                                )
+                                st.markdown(f"**🔍 Senior judge depth critique:** {r['depth_feedback']}")
             else:
                 st.info("No scores or evaluated session data found for this candidate.")
 
-# ── Tab 2: Create candidate ───────────────────────────────────────────────────
-# Replace ONLY the with tab2: block inside admin_app.py
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Tab 2: Create candidate
+# ─────────────────────────────────────────────────────────────────────────────
 with tab2:
-    st.subheader("Create candidate credentials")
+    section_title("Create candidate credentials", icon="fa-user-plus")
+    card_open()
+    st.markdown(
+        "<p style='color:var(--ink-soft); margin:0 0 1rem 0;'>"
+        "New candidates will receive a welcome email with their login credentials before their record is committed."
+        "</p>",
+        unsafe_allow_html=True,
+    )
+
     with st.form("create_candidate_form"):
-        username_input = st.text_input("Username (login ID)")
-        password_input = st.text_input("Password", type="password")
-        full_name_input = st.text_input("Full name")
-        email_input = st.text_input("Email")
-        submitted = st.form_submit_button("Create")
+        c1, c2 = st.columns(2)
+        with c1:
+            username_input = st.text_input("Username (login ID)", placeholder="jane.doe")
+            full_name_input = st.text_input("Full name", placeholder="Jane Doe")
+        with c2:
+            password_input = st.text_input("Password", type="password", placeholder="Set a strong password")
+            email_input = st.text_input("Email", placeholder="jane@example.com")
+        submitted = st.form_submit_button("Create candidate", type="primary")
+    card_close()
 
     if submitted:
         if not username_input or not password_input or not email_input:
-            st.error(
-                "Username, password, and destination email address fields are required."
-            )
+            st.error("Username, password, and destination email address fields are required.")
         elif not _is_valid_email(email_input):
             st.error(
-                "⚠️ Invalid email address format. "
-                "Please enter a valid address (e.g. name@domain.com)."
+                "⚠️ Invalid email address format. Please enter a valid address (e.g. name@domain.com)."
             )
         else:
-            # ── UPGRADED ORDER OF OPERATIONS (Email verification triggers FIRST) ──
-            with st.spinner(
-                "📧 Verifying deliverability and coordinating SMTP connection..."
-            ):
+            with st.spinner("📧 Verifying deliverability and coordinating SMTP connection…"):
                 from backend.utils.mailer import send_welcome_email
 
-                # Call our updated mailer function that returns a success flag and message payload
                 mail_sent, server_message = send_welcome_email(
                     candidate_email=email_input,
                     full_name=full_name_input,
@@ -354,7 +434,6 @@ with tab2:
                 )
 
             if mail_sent:
-                # ONLY if the email domain is verified and delivered, write to PostgreSQL
                 ok = create_candidate(
                     username_input,
                     password_input,
@@ -371,8 +450,7 @@ with tab2:
                     st.code(f"Username: {username_input}\nPassword: {password_input}")
                 else:
                     st.warning(
-                        f"Email sent, but Username '{username_input}' already exists in candidates base database."
+                        f"Email sent, but username '{username_input}' already exists in candidates database."
                     )
             else:
-                # If mail_sent is False, prevent database insertion entirely and show why
-                st.error(f"❌ **Registration Denied:** {server_message}")
+                st.error(f"❌ **Registration denied:** {server_message}")

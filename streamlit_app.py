@@ -35,31 +35,86 @@ from backend.db.queries import (
 )
 from backend.auth.auth import require_candidate_login
 
+# ── UI theme (new) ────────────────────────────────────────────────────────────
+from backend.ui.theme import (
+    apply_theme,
+    render_theme_toggle,
+    render_sidebar_brand,
+    render_hero,
+    section_title,
+    card_open,
+    card_close,
+    chip,
+    _palette,
+)
+
 init_db()
 
 if __name__ != "__portal__":
-    st.set_page_config(page_title="AI Interview System", layout="wide")
-st.title("AI Interview System")
+    st.set_page_config(
+        page_title="AI Interview System",
+        layout="wide",
+        page_icon="🎙️",
+        initial_sidebar_state="expanded",
+    )
+
+# ── Theme + top-bar toggle ────────────────────────────────────────────────────
+apply_theme("candidate")
+render_sidebar_brand("candidate")
+render_theme_toggle(key="theme_toggle_candidate")
 
 # ── Candidate login gate ──────────────────────────────────────────────────────
 username, _ = require_candidate_login()
 
+# ── Hero header ───────────────────────────────────────────────────────────────
+render_hero(
+    eyebrow="Candidate Session",
+    title="AI Interview System",
+    subtitle=(
+        "A calm, distraction-free interview experience. Upload your résumé, take a moment "
+        "to breathe, and we will guide you through each question with a live recorder."
+    ),
+    right_badge=f"Signed in as {username}",
+    right_icon="fa-user-astronaut",
+)
+
 PROCTOR_DIR = Path("storage/proctoring")
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Voice monitor (themed to match app palette)
+# ─────────────────────────────────────────────────────────────────────────────
 def voice_monitor_component(
     low_threshold: float = 0.015, consecutive_frames_limit: int = 120
 ):
+    p = _palette()
     html_code = f"""
-    <div style="background-color: #1a1c23; border-radius: 8px; padding: 12px; font-family: sans-serif; color: #ffffff; border: 1px solid #2d3139;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 14px; font-weight: 600; color: #a0aec0;">🎙️ Live Microphone Input Monitor</span>
-            <div id="status-badge" style="font-size: 11px; padding: 3px 8px; border-radius: 12px; background-color: #2d3748; color: #cbd5e0;">Awaiting Mic...</div>
+    <div style="background:{p['surface']}; border-radius:14px; padding:14px 16px;
+                font-family: 'Manrope', sans-serif; color:{p['ink']};
+                border:1px solid {p['border']}; box-shadow: {p['shadow']};">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-size:13px; font-weight:700; color:{p['ink_soft']};
+                         letter-spacing:.02em; display:inline-flex; align-items:center; gap:.5rem;">
+                <span style="width:8px; height:8px; border-radius:50%;
+                             background:{p['accent']}; box-shadow: 0 0 0 4px rgba(15,118,110,.15);
+                             animation: pulse 1.4s infinite ease-in-out;"></span>
+                Live Microphone Input Monitor
+            </span>
+            <div id="status-badge" style="font-size:11px; padding:4px 10px; border-radius:999px;
+                                          background:{p['chip_bg']}; color:{p['chip_ink']};
+                                          font-weight:700; letter-spacing:.04em;">Awaiting Mic...</div>
         </div>
-        <canvas id="oscilloscope" style="width: 100%; height: 60px; background-color: #0f1115; border-radius: 6px; display: block;"></canvas>
-        <div id="volume-alert" style="height: 20px; color: #fc8181; font-size: 13px; font-weight: bold; margin-top: 6px; text-align: center; transition: opacity 0.2s ease; opacity: 0;">
-            ⚠️ Voice too low! Please speak a bit louder.
+        <canvas id="oscilloscope" style="width:100%; height:60px; background:{p['bg_soft']};
+                                         border:1px solid {p['border']};
+                                         border-radius:10px; display:block;"></canvas>
+        <div id="volume-alert" style="height:20px; color:{p['danger']}; font-size:13px;
+                                      font-weight:700; margin-top:8px; text-align:center;
+                                      transition:opacity .2s ease; opacity:0;">
+            ⚠ Voice too low — please speak a little louder.
         </div>
+        <style>
+          @keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:.35}} }}
+        </style>
     </div>
     <script>
     (async function initVoiceMonitor() {{
@@ -87,13 +142,11 @@ def voice_monitor_component(
             dataArray = new Uint8Array(bufferLength);
             source.connect(analyser);
             badge.textContent = "Live Engine Active";
-            badge.style.backgroundColor = "#22543d";
-            badge.style.color = "#9ae6b4";
             drawOscilloscope();
         }} catch (err) {{
-            badge.textContent = "Mic Blocked/Missing";
-            badge.style.backgroundColor = "#742a2a";
-            badge.style.color = "#fed7d7";
+            badge.textContent = "Mic Blocked / Missing";
+            badge.style.background = "rgba(185,28,28,.10)";
+            badge.style.color = "{p['danger']}";
         }}
         function drawOscilloscope() {{
             requestAnimationFrame(drawOscilloscope);
@@ -113,9 +166,9 @@ def voice_monitor_component(
                 lowVolumeCounter = 0;
                 alertDiv.style.opacity = "0";
             }}
-            canvasCtx.fillStyle = '#0f1115';
+            canvasCtx.fillStyle = '{p['bg_soft']}';
             canvasCtx.fillRect(0, 0, width, height);
-            canvasCtx.strokeStyle = lowVolumeCounter >= FRAME_LIMIT ? '#e53e3e' : '#3182ce';
+            canvasCtx.strokeStyle = lowVolumeCounter >= FRAME_LIMIT ? '{p['danger']}' : '{p['accent']}';
             canvasCtx.lineWidth = 2;
             canvasCtx.beginPath();
             const sliceWidth = width / bufferLength;
@@ -133,20 +186,29 @@ def voice_monitor_component(
     }})();
     </script>
     """
-    components.html(html_code, height=130)
+    components.html(html_code, height=140)
 
 
 def question_speaker_component(session_id: str, question_no: int, question: str):
+    p = _palette()
     question_json = json.dumps(question)
     speech_key = json.dumps(f"spoken_question_{session_id}_{question_no}")
     html_code = f"""
-    <div style="display:flex;align-items:center;gap:10px;font-family:sans-serif;">
+    <div style="display:flex; align-items:center; gap:12px; font-family:'Manrope',sans-serif;">
         <button id="speakQuestion" type="button"
-            style="border:1px solid #64748b;border-radius:7px;padding:8px 13px;
-                   background:#f8fafc;color:#0f172a;font-weight:600;cursor:pointer;">
-            Speaker: Replay question
+            style="border:1px solid {p['border']}; border-radius:12px; padding:9px 15px;
+                   background:{p['surface_2']}; color:{p['ink']}; font-weight:600;
+                   cursor:pointer; display:inline-flex; align-items:center; gap:.5rem;
+                   box-shadow: 0 1px 2px rgba(11,37,69,.04); transition: all .15s ease;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="{p['accent']}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            Replay question
         </button>
-        <span id="speechStatus" style="font-size:13px;color:#64748b;"></span>
+        <span id="speechStatus" style="font-size:13px; color:{p['muted']};"></span>
     </div>
     <script>
     (function() {{
@@ -156,7 +218,6 @@ def question_speaker_component(session_id: str, question_no: int, question: str)
         const status = document.getElementById("speechStatus");
         let speechWindow = window;
         let storage = window.sessionStorage;
-
         try {{
             if (window.parent && window.parent.speechSynthesis) {{
                 speechWindow = window.parent;
@@ -166,14 +227,12 @@ def question_speaker_component(session_id: str, question_no: int, question: str)
             speechWindow = window;
             storage = window.sessionStorage;
         }}
-
         function speakQuestion() {{
             if (!("speechSynthesis" in speechWindow)) {{
                 status.textContent = "Text-to-speech is unavailable in this browser.";
                 button.disabled = true;
                 return;
             }}
-
             speechWindow.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(question);
             utterance.lang = "en-US";
@@ -184,9 +243,7 @@ def question_speaker_component(session_id: str, question_no: int, question: str)
             utterance.onerror = () => status.textContent = "Unable to play speech.";
             speechWindow.speechSynthesis.speak(utterance);
         }}
-
         button.addEventListener("click", speakQuestion);
-
         if (!storage.getItem(speechKey)) {{
             storage.setItem(speechKey, "1");
             setTimeout(speakQuestion, 250);
@@ -194,7 +251,7 @@ def question_speaker_component(session_id: str, question_no: int, question: str)
     }})();
     </script>
     """
-    components.html(html_code, height=48)
+    components.html(html_code, height=52)
 
 
 def load_proctor_status(session_id: str) -> dict:
@@ -251,53 +308,61 @@ DEFAULTS = {
     "scoring_status": "idle",
     "scoring_results": {},
     "scoring_error": "",
-    # ── DB write guards — prevent duplicate writes on reruns ──────────────────
     "db_session_saved": False,
     "db_started_set": False,
     "db_completed_saved": False,
 }
-
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
+
 # ── Resume upload ─────────────────────────────────────────────────────────────
-resume = st.file_uploader("Upload Resume", type=["pdf"])
+section_title("Upload your résumé to begin", icon="fa-file-arrow-up")
+st.caption(
+    "PDF only • We use it to tailor the interview to your background. Nothing is shared publicly."
+)
+resume = st.file_uploader(" ", type=["pdf"], label_visibility="collapsed")
 
 if resume:
     try:
         if st.session_state["interview_session"] is None:
-            validate_resume(resume)
-            path = save_resume(resume)
-            text = extract_text(path)
-            cleaned = clean_resume(text)
-            profile = understand_resume(cleaned)
-            blueprint = build_blueprint(profile)
-            questions = generate_questions(profile, blueprint)
-            final_questions = validate_questions(questions)
-            session = create_session(profile, final_questions, username=username)
-            st.session_state["interview_session"] = session
+            with st.spinner("Analysing résumé and crafting your personalised interview…"):
+                validate_resume(resume)
+                path = save_resume(resume)
+                text = extract_text(path)
+                cleaned = clean_resume(text)
+                profile = understand_resume(cleaned)
+                blueprint = build_blueprint(profile)
+                questions = generate_questions(profile, blueprint)
+                final_questions = validate_questions(questions)
+                session = create_session(profile, final_questions, username=username)
+                st.session_state["interview_session"] = session
 
-            # ── DB: save session + resume once on creation ────────────────────
-            save_session(
-                session["session_id"],
-                username,
-                session["status"],
-                session["expires_at"],
-            )
-            save_resume_data(session["session_id"], username, profile)
-            st.session_state["db_session_saved"] = True
+                save_session(
+                    session["session_id"],
+                    username,
+                    session["status"],
+                    session["expires_at"],
+                )
+                save_resume_data(session["session_id"], username, profile)
+                st.session_state["db_session_saved"] = True
 
         session = st.session_state["interview_session"]
         profile = session["candidate"]
         questions = session["questions"]
 
-        st.success("Resume Processed")
+        st.markdown(
+            f"""<div style="margin:.5rem 0 1rem 0;">{chip("Résumé processed", "")}
+                {chip(f"{len(questions)} questions ready", "muted")}
+                {chip(f"Session {session['session_id'][:8]}", "muted")}</div>""",
+            unsafe_allow_html=True,
+        )
 
-        with st.expander("Candidate Profile"):
+        with st.expander("View extracted candidate profile"):
             st.json(profile)
 
-        st.subheader("Interview Session")
+        section_title("Interview session overview", icon="fa-clipboard-check")
         col1, col2, col3 = st.columns(3)
         col1.metric("Status", session["status"])
         col2.metric("Questions", len(questions))
@@ -307,20 +372,28 @@ if resume:
 
         # ── Pre-interview ─────────────────────────────────────────────────────
         if not st.session_state["interview_started"]:
-            if st.button("Start Interview"):
+            card_open("Ready when you are", icon="fa-play")
+            st.markdown(
+                "<p style='color:var(--ink-soft); margin:.2rem 0 1rem 0;'>"
+                "Once you start, each question has a short reading window followed by a live recording phase. "
+                "Find a quiet spot, check your camera and microphone, and take a deep breath."
+                "</p>",
+                unsafe_allow_html=True,
+            )
+            if st.button("Start interview →", type="primary"):
                 session = initialize_interview(session)
                 st.session_state["interview_session"] = session
                 st.session_state["interview_started"] = True
                 st.session_state["phase"] = "READ"
                 st.session_state["phase_start"] = time.time()
 
-                # ── DB: set started_at exactly once ───────────────────────────
                 if not st.session_state["db_started_set"]:
                     set_session_started(session["session_id"])
                     mark_interview_started(username)
                     st.session_state["db_started_set"] = True
 
                 st.rerun()
+            card_close()
 
         # ── Active interview ──────────────────────────────────────────────────
         else:
@@ -350,9 +423,24 @@ if resume:
                 st.stop()
 
             if question:
-                st.progress((index + 1) / len(questions))
-                st.subheader(f"Question {index + 1}")
-                st.info(question)
+                progress_ratio = (index + 1) / len(questions)
+                st.markdown(
+                    f"""<div style="display:flex; justify-content:space-between;
+                                   align-items:center; margin-bottom:.4rem;">
+                        <span style="color:var(--ink-soft); font-weight:600;">
+                            Question {index + 1} of {len(questions)}
+                        </span>
+                        <span class="ai-chip">{int(progress_ratio * 100)}% complete</span>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+                st.progress(progress_ratio)
+
+                card_open(f"Question {index + 1}", icon="fa-comment-dots")
+                st.markdown(
+                    f"<p style='font-size:1.05rem; line-height:1.55; color:var(--ink); margin:.2rem 0 .8rem 0;'>{question}</p>",
+                    unsafe_allow_html=True,
+                )
 
                 phase = st.session_state["phase"]
                 if phase == "READ":
@@ -361,6 +449,7 @@ if resume:
                         index + 1,
                         question,
                     )
+                card_close()
 
                 camera_placeholder = st.empty()
                 with camera_placeholder:
@@ -377,8 +466,20 @@ if resume:
 
                 if phase == "READ":
                     remaining = max(0, READ_TIME - elapsed)
-                    st.warning(f"Read Time: {remaining}s")
-                    st.info("Read carefully")
+                    st.markdown(
+                        f"""<div class="ai-card" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-family:'Fraunces',serif; font-size:1.2rem; color:var(--ink);">
+                                    Read time — <b>{remaining}s</b>
+                                </div>
+                                <div style="color:var(--ink-soft); font-size:.9rem;">
+                                    Take a breath and read the question carefully.
+                                </div>
+                            </div>
+                            {chip("Reading phase", "muted")}
+                        </div>""",
+                        unsafe_allow_html=True,
+                    )
                     if remaining > 0:
                         st_autorefresh(interval=1000, key=f"read_timer_tick_q{index}")
                     if remaining <= 0:
@@ -388,15 +489,30 @@ if resume:
                         st.rerun()
 
                 elif phase == "ANSWER":
-                    st.success("Recording Active")
-                    st.info("Live answer countdown is shown below the camera.")
-                    st.caption(
-                        "Use the recorder's Stop recording button first if you finish early."
+                    st.markdown(
+                        f"""<div class="ai-card" style="border-color: color-mix(in oklab, var(--accent) 40%, var(--border));">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:.7rem;">
+                                    <span style="width:10px; height:10px; border-radius:50%; background:{_palette()['danger']};
+                                                 box-shadow: 0 0 0 6px rgba(185,28,28,.15); animation: pulse 1.2s infinite;"></span>
+                                    <div>
+                                        <div style="font-family:'Fraunces',serif; font-size:1.15rem;">Recording active</div>
+                                        <div style="color:var(--ink-soft); font-size:.88rem;">
+                                            Live countdown is shown under the camera. Use the recorder's Stop button if you finish early.
+                                        </div>
+                                    </div>
+                                </div>
+                                {chip("Answering", "")}
+                            </div>
+                            <style>@keyframes pulse {{0%,100%{{opacity:1}} 50%{{opacity:.4}}}}</style>
+                        </div>""",
+                        unsafe_allow_html=True,
                     )
                     voice_monitor_component(
                         low_threshold=0.042, consecutive_frames_limit=60
                     )
-                    nxt = st.button("NEXT")
+                    st.markdown("<div style='height:.6rem;'></div>", unsafe_allow_html=True)
+                    nxt = st.button("Next question →", type="primary", use_container_width=False)
                     if nxt:
                         st.session_state["question_index"] += 1
                         st.session_state["phase"] = "READ"
@@ -407,7 +523,6 @@ if resume:
             else:
                 session = st.session_state["interview_session"]
 
-                # ── DB: save completion exactly once ──────────────────────────
                 if not st.session_state["db_completed_saved"]:
                     completed_at = datetime.now().isoformat()
                     session["status"] = "COMPLETED"
@@ -427,11 +542,15 @@ if resume:
 
                 start_post_interview_processing(session["session_id"])
 
-                st.success("Interview completed. Thank you.")
-                st.info(
-                    "Your responses are being processed. Evaluation results are "
-                    "available only to the administrator."
+                card_open("Interview completed", icon="fa-circle-check")
+                st.markdown(
+                    "<p style='color:var(--ink-soft);'>"
+                    "Thank you for your time. Your responses are being transcribed and scored. "
+                    "Evaluation results are available only to the administrator."
+                    "</p>",
+                    unsafe_allow_html=True,
                 )
+                card_close()
                 show_post_interview_processing(session["session_id"])
 
     except Exception as exc:
