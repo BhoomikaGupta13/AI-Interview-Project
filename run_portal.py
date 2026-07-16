@@ -9,7 +9,7 @@ COMMANDS = [
         "-m",
         "streamlit",
         "run",
-        "portal_app.py",
+        "portal.py",
         "--server.port",
         "8501",
     ],
