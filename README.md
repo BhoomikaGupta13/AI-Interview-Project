@@ -237,24 +237,3 @@ python -m backend.scoring.pipeline   <session_id>   # score one session
 | `GET /proctor_status` | Current proctoring state for a session |
 | `POST /finalize_interview` | Mark COMPLETED / TERMINATED and queue scoring |
 | `GET /ping` | Health check |
-
----
-
-## Known limitations
-
-- **Security:**
-  - the admin credentials are hard-coded;
-  - the invitation e-mail contains the plain-text password;
-  - the invitation link points to `localhost`.
-- **Proctoring:**
-  - a phone detection is logged but never locks the session;
-  - the server counts a face warning from a single frame, so the browser's 4-frame debounce is effectively bypassed.
-- **Duplicate questions:** filtering is character-based, so re-phrased duplicates (e.g. with "Can you…" prefixed) can slip through.
-- **Scale:** post-processing runs on one in-process worker, so sessions are scored one at a time.
-- **Fairness:** LLM-based scores should be validated against human ratings before being used for hiring decisions. Treat the band as a screening aid, not a verdict.
-
-
-## Author
-
-**Bhoomika Gupta** — B.Tech (CSE), Manipal University Jaipur
-Internship: AIML Department, Dotsquares Technologies India Pvt. Ltd., Jaipur
